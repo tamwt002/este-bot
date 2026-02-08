@@ -1,15 +1,15 @@
 "use client"
 import { useState } from "react"
-import UrlForm from "./components/UrlForm"
-import AuditSection from "./components/AuditSection"
+import UrlForm from "../components/UrlForm"
+import SecurityAuditSection from "../components/SecurityAuditSection"
 
-export default function SeoAuditPage() {
+export default function SecurityAuditPage() {
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(false)
 
   async function runAudit(url) {
     setLoading(true)
-    const res = await fetch("/api/audit", {
+    const res = await fetch("/api/security-audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url })
@@ -22,12 +22,14 @@ export default function SeoAuditPage() {
   return (
     <>
       <h1 className="text-4xl font-bold mb-6">
-        SEO Audit
+        Security Audit
       </h1>
 
       <UrlForm onSubmit={runAudit} loading={loading} />
 
-      {report && <AuditSection report={report} />}
+      {report && (
+        <SecurityAuditSection report={report} />
+      )}
     </>
   )
 }
