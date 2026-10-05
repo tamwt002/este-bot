@@ -6,7 +6,9 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 // SEO metadata (Top-level export)
+// Social preview images come from opengraph-image.js / twitter-image.js
 export const metadata = {
+  metadataBase: new URL("https://www.woztech.world/Esteban"),
   title: "EsteBot | In Depth Auditors",
   description: "Lightweight SEO Audit and Security Audit Tool",
   keywords: ["Cyber Security", "SEO", "Insights"],
@@ -14,17 +16,15 @@ export const metadata = {
   openGraph: {
     title: "EsteBot | In Depth Auditors",
     description: "Lightweight SEO Audit and Security Audit Tool",
-    url: "https://wallace.woztech.world",
+    url: "/",
     siteName: "EsteBot",
-    images: [
-      {
-        url: "/next.svg",
-        width: 1200,
-        height: 630,
-      },
-    ],
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EsteBot | In Depth Auditors",
+    description: "Lightweight SEO Audit and Security Audit Tool",
   },
 };
 
