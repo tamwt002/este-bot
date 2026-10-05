@@ -1,8 +1,12 @@
 # EsteBot
 
-**EsteBot** is a lightweight web auditing tool built with Next.js. Paste in a URL and it runs either an **SEO audit** (on-page metadata, headings, content, links, social tags, structured data) or a **Security audit** (HTTPS, HSTS, security headers, server information exposure).
+**EsteBot is a pre-launch checker for vibe-coded websites.** If you built your app with Lovable, Bolt, v0, Cursor, Replit or any other AI tool, paste in the URL and EsteBot checks for the SEO and security mistakes AI-built sites make most: API keys shipped in frontend JavaScript, downloadable `.env` files, blank pages that Google can't read, template titles, leftover `noindex` tags, and more.
 
-Built by [Tinotenda Tamangani](https://wallace.woztech.world) / WozTech.
+Every issue comes with a plain-English explanation, a severity, an A–F grade, and a **"Copy fix prompt"** button that produces a ready-to-paste instruction for your AI coding tool.
+
+Live at **https://www.woztech.world/Esteban**. Built by [Tinotenda Tamangani](https://wallace.woztech.world) / WozTech.
+
+> ⚠️ Only scan sites you own or have permission to test. See the [Disclaimer & Acceptable Use](https://www.woztech.world/Esteban/disclaimer) policy.
 
 ---
 
@@ -15,35 +19,40 @@ Built by [Tinotenda Tamangani](https://wallace.woztech.world) / WozTech.
 - [Project Structure](#project-structure)
 - [How It Works](#how-it-works)
 - [API Reference](#api-reference)
-- [Audit Rules](#audit-rules)
+- [Scoring](#scoring)
 - [Deployment](#deployment)
 - [Security](#security)
+- [Legal Pages](#legal-pages)
 - [Known Limitations & Roadmap](#known-limitations--roadmap)
 
 ---
 
 ## Features
 
-### SEO Audit (`/`)
-- **Title tag** – value, length, and count (flags duplicates)
-- **Meta description** – value and length
-- **Canonical URL** – detects missing or mismatched canonicals
-- **Robots meta** – detects `noindex` / `nofollow`
-- **Viewport** – checks for `width=device-width`
-- **Headings** – full H1–H6 outline and H1 count
-- **Content** – word count with thin-content flag (< 300 words)
-- **Images** – total count, images missing `alt`, `http://` (mixed content) sources
-- **Links** – internal vs. external link counts
-- **Open Graph** and **Twitter Card** tags
-- **Structured data** – parses all `application/ld+json` blocks
-- **robots.txt** – fetched from the site root and included in the report
-- **HTTPS** status
+### SEO Audit (`/Esteban`)
+Focused on what goes wrong with AI-built sites:
+- **Blank page for crawlers**: detects client-side-rendered SPA shells (empty `#root`/`#app`, almost no text in the HTML). This is the #1 SEO problem for Vite/React apps.
+- **Template defaults**: titles like "Vite + React", "Create Next App" or "Lovable App", default descriptions, `vite.svg` favicons, and the builder's placeholder social image.
+- **Blocked indexing**: `noindex` in meta robots or the `X-Robots-Tag` header, and `robots.txt` that disallows everything.
+- **Leftover dev URLs**: `localhost` in canonical or Open Graph tags.
+- **Basics**: title and description presence and length, canonical, viewport, `lang`, H1, image alt text, Open Graph/Twitter tags, `sitemap.xml`, structured data, HTTPS, mixed content.
+- **Stack detection**: Lovable, Bolt, v0, Replit, Next.js, Vite, Framer, Webflow and more.
 
-### Security Audit (`/security`)
-- **Transport** – HTTPS and `Strict-Transport-Security` (HSTS)
-- **Security headers** – `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` (scored out of 5)
-- **Information exposure** – leaked `Server` and `X-Powered-By` headers
-- Summary score cards (Good / Needs work)
+### Security Audit (`/Esteban/security`)
+Requires the user to confirm they own the site or have permission to test it.
+- **Secret keys in frontend code**: scans the page and up to 20 of the site's own JavaScript bundles for OpenAI, Anthropic, OpenRouter, Groq, Replicate, Hugging Face, Stripe, Supabase `service_role`/`sb_secret_`, AWS, GitHub, Slack and SendGrid keys, private keys, and database URLs with passwords. **Values are always redacted**, e.g. `sk-proj-…a1b2`.
+- **Exposed files**: `/.env`, `/.env.local`, `/.env.production`, `/.git/config`, `/.git/HEAD`. Content is validated to avoid SPA false positives and **never returned**.
+- **Public source maps** and a **dev server running in production** (Vite HMR, webpack-hmr, React Refresh).
+- **Transport**: HTTPS, HTTP→HTTPS redirect, HSTS presence and `max-age`.
+- **Headers**: CSP presence and weakness (`unsafe-eval`, wildcards), clickjacking protection, `nosniff`, Referrer-Policy, Permissions-Policy, `X-Powered-By`/version leaks.
+- **CORS**: wildcard, or reflected origin combined with credentials.
+- **Cookies**: missing `Secure`, `HttpOnly` (session cookies) and `SameSite`.
+- **Supabase / Firebase detected**: reminders to check RLS and Security Rules. EsteBot never queries the database itself.
+
+### Report
+- A–F grade and 0–100 score, issue counts by severity
+- Each finding has a plain-English explanation, evidence and a "How to fix" note, plus a **Copy fix prompt** button
+- Passed checks and raw technical details shown in collapsible sections
 
 ---
 
@@ -103,29 +112,33 @@ None required. The app has no database, API keys, or external services — it on
 
 ```
 src/app/
-├── layout.js                     # Root layout, Navbar, global metadata & Open Graph
-├── page.js                       # SEO Audit page (client component)
+├── layout.js                     # Root layout, Navbar, Footer, global metadata
+├── page.js                       # SEO Audit page
 ├── opengraph-image.js            # Generated 1200×630 social preview image
 ├── twitter-image.js              # Same image for Twitter/X cards
 ├── globals.css                   # Tailwind entry
-├── security/
-│   └── page.jsx                  # Security Audit page (client component)
-├── bot/
-│   └── page.jsx                  # /bot – info page for site owners about EsteBot
+├── security/page.jsx             # Security Audit page (with permission checkbox)
+├── privacy/page.jsx              # Privacy Policy
+├── disclaimer/page.jsx           # Disclaimer & Acceptable Use
+├── bot/page.jsx                  # Info page for site owners about the EsteBot crawler
 ├── api/
-│   ├── audit/route.js            # POST /api/audit – SEO audit endpoint
-│   └── security-audit/route.js   # POST /api/security-audit – security endpoint
+│   ├── audit/route.js            # POST /api/audit – SEO audit (+ robots.txt, sitemap)
+│   └── security-audit/route.js   # POST /api/security-audit – security audit (consent required)
 ├── lib/
-│   ├── seoChecks.js              # runSeoChecks(html, url, status) – cheerio-based checks
-│   ├── securityChecks.js         # runSecurityChecks(url) – header inspection
-│   ├── safeFetch.js              # SSRF-safe HTTP client + EsteBot User-Agent
+│   ├── seoChecks.js              # SEO checks → findings
+│   ├── securityChecks.js         # Headers, bundles, exposed files, CORS, cookies → findings
+│   ├── secretPatterns.js         # Secret-key regexes, Supabase JWT role detection, redaction
+│   ├── findings.js               # Finding shape, scoring/grade, stack detection
+│   ├── safeFetch.js              # SSRF-safe HTTP client, bot-challenge detection, User-Agent
 │   └── rateLimit.js              # Per-IP rate limiter for API routes
 └── components/
-    ├── Navbar.jsx                # Top nav with active-route highlighting
-    ├── UrlForm.jsx               # Shared URL input + submit button
-    ├── AuditSection.jsx          # Renders the SEO report
-    ├── SecurityAuditSection.jsx  # Renders the security report
-    └── ScoreCard.jsx             # Summary card (Good / Needs work)
+    ├── Navbar.jsx / Footer.jsx
+    ├── UrlForm.jsx               # URL input, optional permission checkbox
+    ├── FindingsReport.jsx        # Grade, findings, copy-prompt buttons, passed checks
+    ├── AuditSection.jsx          # Raw SEO details
+    ├── SecurityAuditSection.jsx  # Raw security details
+    ├── ScoreCard.jsx
+    └── LegalSection.jsx          # Shared layout for legal pages
 ```
 
 ---
@@ -133,19 +146,20 @@ src/app/
 ## How It Works
 
 ```
-Browser (UrlForm) ──POST {url}──▶ Next.js API route ──HTTP GET──▶ Target site
-        ▲                               │
-        └──────── JSON report ◀─────────┘
+Browser (UrlForm) ──POST {url}──▶ Next.js API route ──HTTP GET (safeFetch)──▶ Target site
+        ▲                               │                                      (page, JS bundles,
+        └──── JSON report (findings) ◀──┘                                       robots, sitemap, probes)
 ```
 
-1. The user submits a URL through `UrlForm`.
-2. The page POSTs `{ url }` to the matching API route.
-3. The route fetches the target **server-side** (avoiding CORS) and runs the checks in `src/app/lib/`.
-4. A JSON report is returned and rendered by `AuditSection` or `SecurityAuditSection`.
+1. The user submits a URL; Security Audits also send `consent: true` from the checkbox.
+2. The API route fetches the target **server-side** through `safeFetch` (SSRF-protected).
+3. Bot-protection challenges (e.g. Cloudflare "Just a moment…") are detected and reported as an error, **not bypassed**.
+4. Checks in `src/app/lib/` produce a list of findings, which `findings.js` scores.
+5. `FindingsReport` renders the grade, findings and fix prompts; raw data is under "Technical details".
 
-**SEO fetch details:** 15s timeout, up to 5 redirects (each re-validated), 5 MB cap. Non-HTML responses are rejected with `415`. `robots.txt` is fetched separately with a 5s timeout (failure is non-fatal).
+**SEO fetches:** page (15s, 5 MB, up to 5 redirects), `robots.txt` (5s), `sitemap.xml` or the one declared in robots.txt (5s, 10 MB).
 
-**Security fetch details:** redirects are not followed, so headers are read from the *first* response. A URL without a scheme is prefixed with `https://`.
+**Security fetches:** first response without following redirects (for headers, sent with a test `Origin` to detect CORS reflection), the final page if it redirected, `http://` version (redirect check), up to 20 same-site scripts (8s, 5 MB each), 5 sensitive-file probes (64 KB cap), up to 3 source maps (headers only).
 
 ---
 
@@ -158,83 +172,61 @@ Request:
 { "url": "https://example.com" }
 ```
 
-Response `200` (abridged):
-```json
-{
-  "url": "https://example.com/",
-  "status": 200,
-  "robotsTxt": "User-agent: *\n...",
-  "onPage": {
-    "title":           { "value": "...", "length": 42, "count": 1, "all": ["..."], "ok": true },
-    "metaDescription": { "value": "...", "length": 150, "ok": true },
-    "canonical":       { "value": "...", "selfReferencing": true, "mismatch": false },
-    "robots":          { "value": "index,follow", "noindex": false, "nofollow": false },
-    "viewport":        { "value": "width=device-width, initial-scale=1", "ok": true },
-    "headings":        { "h1Count": 1, "h1s": ["..."], "all": [{ "tag": "h1", "text": "..." }] },
-    "content":         { "wordCount": 812, "thin": false },
-    "images":          { "total": 10, "missingAlt": 2, "mixedContent": [] },
-    "links":           { "internal": [], "external": [], "internalCount": 30, "externalCount": 4 },
-    "openGraph":       { "title": "", "description": "", "image": "", "url": "" },
-    "twitter":         { "card": "", "title": "", "description": "", "image": "" },
-    "schema":          [],
-    "security":        { "https": true, "mixedContent": false }
-  }
-}
-```
-
-Errors:
-| Status | Body |
-|--------|------|
-| 400 | `{ "error": "URL required" }` / `{ "error": "Invalid URL format" }` |
-| 400 | `{ "error": "That address is not allowed" }` (private/internal target), bad scheme/port/credentials |
-| 413 | `{ "error": "The page is too large to audit" }` |
-| 415 | `{ "error": "URL did not return HTML" }` |
-| 429 | `{ "error": "Too many requests..." }` (+ `Retry-After` header) |
-| 502 / 504 | Site not found, unreachable, too many redirects, or timed out |
-| 500 | `{ "error": "Failed to fetch URL" }` |
-
 ### `POST /api/security-audit`
 
 Request:
 ```json
-{ "url": "example.com" }
+{ "url": "example.com", "consent": true }
 ```
+`consent` must be `true`, or the request is rejected with `400`.
 
-Response `200`:
+### Response (both endpoints, abridged)
 ```json
 {
-  "url": "https://example.com",
+  "url": "https://example.com/",
   "status": 200,
-  "checks": {
-    "transport": { "https": true, "hsts": true },
-    "headers": {
-      "csp": false,
-      "xFrame": true,
-      "xContentType": true,
-      "referrerPolicy": true,
-      "permissionsPolicy": false
-    },
-    "exposure": { "server": "nginx", "xPoweredBy": null }
-  }
+  "stack": ["Lovable", "Vite"],
+  "summary": { "score": 42, "grade": "F", "counts": { "critical": 1, "high": 1, "medium": 2, "low": 3, "info": 0 } },
+  "findings": [
+    {
+      "id": "empty-shell",
+      "severity": "critical",
+      "title": "Search engines see a blank page",
+      "detail": "Plain-English explanation…",
+      "fix": "Instruction to paste into an AI coding tool…",
+      "evidence": "optional, never a full secret"
+    }
+  ],
+  "passed": ["Mobile viewport is set", "…"],
+  "onPage": { "…": "SEO endpoint only: raw on-page data" },
+  "checks": { "…": "security endpoint only: raw header/secret/exposure data" }
 }
 ```
 
-Errors: same as above (`400`, `429`, `502`, `504`), plus `500 { "error": "Security audit failed" }`.
+### Errors
+| Status | Meaning |
+|--------|---------|
+| 400 | Missing/invalid URL, blocked address (private/internal), bad scheme/port/credentials, missing consent |
+| 413 | Page too large |
+| 415 | URL did not return HTML (SEO) |
+| 422 | Blocked by the site's bot protection |
+| 429 | Rate limit exceeded (+ `Retry-After`) |
+| 502 / 504 | Site not found, unreachable, too many redirects, or timed out |
+| 500 | Unexpected error |
 
 ---
 
-## Audit Rules
+## Scoring
 
-| Check | Passes when |
-|-------|-------------|
-| Title | Exactly one `<title>`, 30–60 characters |
-| Meta description | 120–160 characters |
-| Canonical | `href` exactly equals the audited URL (otherwise flagged as mismatch) |
-| Viewport | Contains `width=device-width` |
-| Content | ≥ 300 words in `<body>` |
-| Images | Every `<img>` has a non-empty `alt` |
-| Security headers card | ≥ 4 of 5 headers present |
-| Info exposure card | Neither `Server` nor `X-Powered-By` is sent |
+Each audit starts at 100 and loses points per finding: **critical −30, high −15, medium −7, low −3, info 0**. Any critical finding caps the score at 49 (grade F).
+
+| Grade | Score |
+|-------|-------|
+| A | 90–100 |
+| B | 80–89 |
+| C | 65–79 |
+| D | 50–64 |
+| F | 0–49 |
 
 ---
 
@@ -287,18 +279,29 @@ All outbound requests go through `src/app/lib/safeFetch.js`, which protects agai
 
 Both API routes are rate-limited to **10 requests per minute per IP** (`src/app/lib/rateLimit.js`). The limiter is in-memory, so on serverless hosts each instance counts separately; swap in a shared store (e.g. Upstash Redis) for a strict global limit. Client IPs come from `x-forwarded-for`, which is trustworthy on Vercel but should be set by your reverse proxy elsewhere.
 
+Detected secrets are redacted on the server and sensitive-file contents are never returned. Bot-protection challenges are respected, never bypassed.
+
 Bot requests identify as `EsteBot/1.0 (+https://www.woztech.world/Esteban/bot)`; the info page lives at `/Esteban/bot`.
+
+---
+
+## Legal Pages
+
+- `/Esteban/privacy`: Privacy Policy (no accounts, cookies or analytics; URLs and results aren't stored; IPs held in memory for rate limiting).
+- `/Esteban/disclaimer`: Disclaimer & Acceptable Use (authorised testing only, no harvesting, no warranty, limitation of liability).
+
+These are written as sensible defaults, not legal advice. Have them reviewed if EsteBot becomes a commercial service.
 
 ---
 
 ## Known Limitations & Roadmap
 
-- Header checks are presence-only; header *values* (e.g. weak CSP, short HSTS `max-age`) aren't evaluated.
-- Canonical comparison is an exact string match, so `https://example.com` vs `https://example.com/` or relative canonicals are flagged as mismatches.
-- An empty `<body>` reports a word count of 1.
-- Internal/external link classification is a simple string match on the host.
-- `ScoreCard` and the `ok` flags on title/description aren't yet surfaced in the SEO report UI.
-- No automated tests yet.
+- Sites behind bot protection (Cloudflare challenge, etc.) can't be audited unless the owner allows the EsteBot user agent.
+- Only the submitted page is audited (no multi-page crawl).
+- Script scanning covers the site's own domain/subdomains, not third-party CDNs.
+- Supabase RLS and Firebase rules are flagged as reminders, not tested, by design.
+- Secret detection is pattern-based; unusual key formats can be missed.
+- No automated test suite in the repo yet.
 
 ---
 

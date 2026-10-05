@@ -176,6 +176,27 @@ export async function safeFetch(
   }
 }
 
+/**
+ * Throws if the response is a bot-protection challenge (Cloudflare, Vercel,
+ * etc.) rather than the real site. We respect these and never try to bypass them.
+ */
+export function assertNotChallenged(res) {
+  const h = res.headers
+  const body = typeof res.data === "string" ? res.data.slice(0, 20000) : ""
+  const challenged =
+    /challenge/i.test(h["cf-mitigated"] || "") ||
+    /challenge/i.test(h["x-vercel-mitigated"] || "") ||
+    ([401, 403, 429, 503].includes(res.status) &&
+      /<title>(Just a moment|Attention Required|Access denied)|challenge-platform|cf-chl|_Incapsula_|captcha-delivery|px-captcha/i.test(body))
+
+  if (challenged) {
+    throw new FetchError(
+      "This site's bot protection (e.g. Cloudflare) blocked EsteBot, so it can't be audited. If it's your site, allow the EsteBot user agent in your firewall settings, then try again.",
+      422
+    )
+  }
+}
+
 function toFetchError(err) {
   if (err instanceof FetchError) return err
   if (err.code === "EBLOCKED" || err.cause?.code === "EBLOCKED") {

@@ -1,5 +1,5 @@
 import { runSeoChecks } from "@/app/lib/seoChecks"
-import { safeFetch, validateUrl, FetchError } from "@/app/lib/safeFetch"
+import { safeFetch, validateUrl, FetchError, assertNotChallenged } from "@/app/lib/safeFetch"
 import { rateLimit } from "@/app/lib/rateLimit"
 
 export async function POST(req) {
@@ -25,27 +25,19 @@ export async function POST(req) {
     return Response.json({ error: err.message }, { status: 400 })
   }
 
-  const robotsUrl = new URL("/robots.txt", normalizedUrl).toString()
-
-  let robotsTxt = null
   try {
-    const robotsRes = await safeFetch(robotsUrl, {
-      timeout: 5000,
-      maxBytes: 512 * 1024
-    })
-    if (robotsRes.status === 200) robotsTxt = robotsRes.data
-  } catch {
-    robotsTxt = null
-  }
+    const [res, robotsTxt] = await Promise.all([
+      safeFetch(normalizedUrl, {
+        timeout: 15000,
+        headers: {
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+      }),
+      fetchText(new URL("/robots.txt", normalizedUrl).toString())
+    ])
 
-  try {
-    const res = await safeFetch(normalizedUrl, {
-      timeout: 15000,
-      headers: {
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-      }
-    })
+    assertNotChallenged(res)
 
     const contentType = res.headers["content-type"] || ""
 
@@ -56,7 +48,13 @@ export async function POST(req) {
       )
     }
 
-    const report = runSeoChecks(res.data, res.url, res.status)
+    const sitemapFound = await findSitemap(res.url, robotsTxt)
+
+    const report = runSeoChecks(res.data, res.url, res.status, {
+      headers: res.headers,
+      robotsTxt,
+      sitemapFound
+    })
     report.robotsTxt = robotsTxt
 
     return Response.json(report)
@@ -68,4 +66,35 @@ export async function POST(req) {
     console.error("SEO audit error:", err)
     return Response.json({ error: "Failed to fetch URL" }, { status: 500 })
   }
+}
+
+// Returns the body of a small text file, or null if missing/unreachable.
+async function fetchText(url, maxBytes = 512 * 1024) {
+  try {
+    const res = await safeFetch(url, { timeout: 5000, maxBytes })
+    if (res.status !== 200 || typeof res.data !== "string") return null
+    // SPAs often answer every path with index.html.
+    if (/^\s*<(!doctype|html)/i.test(res.data)) return null
+    return res.data
+  } catch {
+    return null
+  }
+}
+
+async function findSitemap(pageUrl, robotsTxt) {
+  const declared = robotsTxt?.match(/^\s*sitemap:\s*(\S+)/im)?.[1]
+  const candidates = [declared, new URL("/sitemap.xml", pageUrl).toString()]
+    .filter(Boolean)
+
+  for (const candidate of candidates) {
+    let sitemapUrl
+    try {
+      sitemapUrl = new URL(candidate, pageUrl).toString()
+    } catch {
+      continue
+    }
+    const xml = await fetchText(sitemapUrl, 10 * 1024 * 1024)
+    if (xml && /<(urlset|sitemapindex)\b/i.test(xml)) return true
+  }
+  return false
 }

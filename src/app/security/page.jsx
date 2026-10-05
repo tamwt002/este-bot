@@ -2,13 +2,14 @@
 import { useState } from "react"
 import UrlForm from "../components/UrlForm"
 import SecurityAuditSection from "../components/SecurityAuditSection"
+import FindingsReport from "../components/FindingsReport"
 
 export default function SecurityAuditPage() {
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  async function runAudit(input) {
+  async function runAudit(input, consent) {
     setError(null)
     setReport(null)
 
@@ -27,16 +28,22 @@ export default function SecurityAuditPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH}/api/security-audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-        signal: AbortSignal.timeout(30000)
+        body: JSON.stringify({ url, consent }),
+        signal: AbortSignal.timeout(60000)
       })
 
       const data = await res.json()
 
-      if (!res.ok || !data.checks) {
+      if (!res.ok || !data.findings) {
         setError(data.error || "Something went wrong.")
       } else {
         setReport(data)
+
+        setTimeout(() => {
+          document
+            .getElementById("audit-results")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }, 150)
       }
     } catch (err) {
       setError(
@@ -51,11 +58,17 @@ export default function SecurityAuditPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl font-bold mb-6">
-        Security Audit
-      </h1>
+      <div className="space-y-3">
+        <h1 className="text-4xl font-bold">Security Audit</h1>
+        <p className="text-zinc-600 max-w-2xl">
+          AI tools ship fast, but they also ship API keys in your frontend code, leave
+          .env files downloadable and skip security headers. EsteBot checks the live site
+          for the mistakes vibe-coded apps make most. Any secrets it finds are redacted and
+          never stored.
+        </p>
+      </div>
 
-      <UrlForm onSubmit={runAudit} loading={loading} />
+      <UrlForm onSubmit={runAudit} loading={loading} requireConsent />
 
       {error && (
         <div className="p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg">
@@ -66,12 +79,16 @@ export default function SecurityAuditPage() {
       {loading && (
         <div className="flex items-center gap-3 text-zinc-600">
           <div className="animate-spin h-5 w-5 border-2 border-zinc-400 border-t-transparent rounded-full" />
-          Running audit…
+          Scanning headers, JavaScript bundles and common exposed files…
         </div>
       )}
 
       {report && (
-        <SecurityAuditSection report={report} />
+        <div id="audit-results">
+          <FindingsReport report={report} kind="Security">
+            <SecurityAuditSection report={report} />
+          </FindingsReport>
+        </div>
       )}
     </div>
   )

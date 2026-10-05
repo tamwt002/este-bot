@@ -13,10 +13,17 @@ export async function POST(req) {
     return Response.json({ error: "Invalid request body" }, { status: 400 })
   }
 
-  const { url } = body || {}
+  const { url, consent } = body || {}
   if (!url || typeof url !== "string") {
     return Response.json(
       { error: "URL required" },
+      { status: 400 }
+    )
+  }
+
+  if (consent !== true) {
+    return Response.json(
+      { error: "Please confirm you own this site or have permission to test it." },
       { status: 400 }
     )
   }

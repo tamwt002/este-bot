@@ -17,9 +17,10 @@ export default function BotPage() {
       <div className="bg-white border rounded-xl p-6 shadow-sm space-y-3">
         <h2 className="font-semibold text-lg">What it does</h2>
         <ul className="list-disc pl-5 space-y-2 text-zinc-700">
-          <li>Requests only the single page a user submitted, plus <code>/robots.txt</code>.</li>
-          <li>Does not crawl or follow links, and does not store page contents.</li>
-          <li>Reads public HTML and HTTP response headers only.</li>
+          <li>Requests the single page a user submitted, its own JavaScript files, and standard files like <code>/robots.txt</code> and <code>/sitemap.xml</code>.</li>
+          <li>For security audits, checks whether a few sensitive paths (such as <code>/.env</code> and <code>/.git/config</code>) are publicly reachable. Their contents are never shown or stored.</li>
+          <li>Security audits require the user to confirm they own the site or have permission to test it.</li>
+          <li>Does not crawl beyond these files, log in, submit forms, or attempt to exploit anything.</li>
           <li>Is rate-limited per user.</li>
         </ul>
       </div>
@@ -33,8 +34,8 @@ export default function BotPage() {
 
       <p className="text-zinc-600">
         Questions or concerns? Get in touch via{" "}
-        <a href="https://wallace.woztech.world" className="underline">
-          wallace.woztech.world
+        <a href="https://www.woztech.world" className="underline">
+          woztech.world
         </a>
         .
       </p>

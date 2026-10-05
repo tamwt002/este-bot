@@ -3,15 +3,18 @@
 import { useState } from "react"
 import UrlForm from "./components/UrlForm"
 import AuditSection from "./components/AuditSection"
+import FindingsReport from "./components/FindingsReport"
 
 export default function SeoAuditPage() {
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  async function runAudit(url) {
+  async function runAudit(input) {
     setError(null)
     setReport(null)
+
+    const url = /^https?:\/\//i.test(input) ? input : `https://${input}`
 
     try {
       new URL(url)
@@ -26,12 +29,13 @@ export default function SeoAuditPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH}/api/audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url }),
+        signal: AbortSignal.timeout(45000)
       })
 
       const data = await res.json()
 
-      if (!res.ok) {
+      if (!res.ok || !data.findings) {
         setError(data.error || "Something went wrong.")
       } else {
         setReport(data)
@@ -42,16 +46,28 @@ export default function SeoAuditPage() {
             ?.scrollIntoView({ behavior: "smooth" })
         }, 150)
       }
-    } catch {
-      setError("Network error. Try again.")
+    } catch (err) {
+      setError(
+        err.name === "TimeoutError"
+          ? "The audit timed out. Try again."
+          : "Network error. Try again."
+      )
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl font-bold mb-6">SEO Audit</h1>
+      <div className="space-y-3">
+        <h1 className="text-4xl font-bold">SEO Audit</h1>
+        <p className="text-zinc-600 max-w-2xl">
+          Built your site with Lovable, Bolt, v0, Cursor or Replit? Check whether Google
+          can actually see it. EsteBot looks for the SEO mistakes AI-built sites make most,
+          like blank pages for crawlers, template titles and leftover noindex tags, and gives
+          you a prompt to paste back into your AI tool to fix each one.
+        </p>
+      </div>
 
       <UrlForm onSubmit={runAudit} loading={loading} />
 
@@ -70,7 +86,9 @@ export default function SeoAuditPage() {
 
       {report && (
         <div id="audit-results">
-          <AuditSection report={report} />
+          <FindingsReport report={report} kind="SEO">
+            <AuditSection report={report} />
+          </FindingsReport>
         </div>
       )}
     </div>
