@@ -17,6 +17,7 @@ Built by [Tinotenda Tamangani](https://wallace.woztech.world) / WozTech.
 - [API Reference](#api-reference)
 - [Audit Rules](#audit-rules)
 - [Deployment](#deployment)
+- [Security](#security)
 - [Known Limitations & Roadmap](#known-limitations--roadmap)
 
 ---
@@ -51,8 +52,8 @@ Built by [Tinotenda Tamangani](https://wallace.woztech.world) / WozTech.
 | Layer      | Technology |
 |------------|------------|
 | Framework  | [Next.js 16](https://nextjs.org) (App Router) with the React Compiler enabled |
-| UI         | React 19, Tailwind CSS v4, `lucide-react` icons, Inter (via `next/font`) |
-| HTTP       | `axios` (SEO fetches), native `fetch` (security checks) |
+| UI         | React 19, Tailwind CSS v4, Inter (via `next/font`) |
+| HTTP       | `axios` via an SSRF-safe wrapper (`lib/safeFetch.js`) |
 | Parsing    | `cheerio` (server-side HTML parsing) |
 | Linting    | ESLint 9 + `eslint-config-next` |
 | Language   | JavaScript (path alias `@/*` → `src/*`, see `jsconfig.json`) |
@@ -104,12 +105,16 @@ src/app/
 ├── globals.css                   # Tailwind entry
 ├── security/
 │   └── page.jsx                  # Security Audit page (client component)
+├── bot/
+│   └── page.jsx                  # /bot – info page for site owners about EsteBot
 ├── api/
 │   ├── audit/route.js            # POST /api/audit – SEO audit endpoint
 │   └── security-audit/route.js   # POST /api/security-audit – security endpoint
 ├── lib/
 │   ├── seoChecks.js              # runSeoChecks(html, url, status) – cheerio-based checks
-│   └── securityChecks.js         # runSecurityChecks(url) – header inspection
+│   ├── securityChecks.js         # runSecurityChecks(url) – header inspection
+│   ├── safeFetch.js              # SSRF-safe HTTP client + EsteBot User-Agent
+│   └── rateLimit.js              # Per-IP rate limiter for API routes
 └── components/
     ├── Navbar.jsx                # Top nav with active-route highlighting
     ├── UrlForm.jsx               # Shared URL input + submit button
@@ -133,9 +138,9 @@ Browser (UrlForm) ──POST {url}──▶ Next.js API route ──HTTP GET─�
 3. The route fetches the target **server-side** (avoiding CORS) and runs the checks in `src/app/lib/`.
 4. A JSON report is returned and rendered by `AuditSection` or `SecurityAuditSection`.
 
-**SEO fetch details:** 15s timeout, up to 5 redirects, User-Agent `WozSEO-Bot/1.0`. Non-HTML responses are rejected with `415`. `robots.txt` is fetched separately with a 5s timeout (failure is non-fatal).
+**SEO fetch details:** 15s timeout, up to 5 redirects (each re-validated), 5 MB cap. Non-HTML responses are rejected with `415`. `robots.txt` is fetched separately with a 5s timeout (failure is non-fatal).
 
-**Security fetch details:** uses `redirect: "manual"` so headers are read from the *first* response. A URL without a scheme is prefixed with `https://`.
+**Security fetch details:** redirects are not followed, so headers are read from the *first* response. A URL without a scheme is prefixed with `https://`.
 
 ---
 
@@ -176,8 +181,12 @@ Errors:
 | Status | Body |
 |--------|------|
 | 400 | `{ "error": "URL required" }` / `{ "error": "Invalid URL format" }` |
-| 415 | `{ "error": "URL did not return HTML", "contentType": "..." }` |
-| 500 | `{ "error": "Failed to fetch URL", "details": "..." }` |
+| 400 | `{ "error": "That address is not allowed" }` (private/internal target), bad scheme/port/credentials |
+| 413 | `{ "error": "The page is too large to audit" }` |
+| 415 | `{ "error": "URL did not return HTML" }` |
+| 429 | `{ "error": "Too many requests..." }` (+ `Retry-After` header) |
+| 502 / 504 | Site not found, unreachable, too many redirects, or timed out |
+| 500 | `{ "error": "Failed to fetch URL" }` |
 
 ### `POST /api/security-audit`
 
@@ -205,7 +214,7 @@ Response `200`:
 }
 ```
 
-Errors: `400 { "error": "URL required" }`, `500 { "error": "Security audit failed" }`.
+Errors: same as above (`400`, `429`, `502`, `504`), plus `500 { "error": "Security audit failed" }`.
 
 ---
 
@@ -233,19 +242,33 @@ npm run build
 npm run start
 ```
 
-Before going public, see the SSRF note below.
+Before going public, read the [Security](#security) section.
+
+---
+
+## Security
+
+All outbound requests go through `src/app/lib/safeFetch.js`, which protects against SSRF:
+
+- Only `http:`/`https:` on ports 80/443; URLs with embedded credentials are rejected.
+- Hostnames are resolved **at connect time** and any private, loopback, link-local (cloud metadata), CGNAT, multicast or reserved IPv4/IPv6 address is blocked (also defeats DNS rebinding).
+- Redirects are followed manually (max 5) and **every hop** is re-validated.
+- Timeouts (15s page / 10s headers / 5s robots.txt) and a 5 MB response cap.
+- Users only ever see generic error messages, never raw network errors.
+
+Both API routes are rate-limited to **10 requests per minute per IP** (`src/app/lib/rateLimit.js`). The limiter is in-memory, so on serverless hosts each instance counts separately; swap in a shared store (e.g. Upstash Redis) for a strict global limit. Client IPs come from `x-forwarded-for`, which is trustworthy on Vercel but should be set by your reverse proxy elsewhere.
+
+Bot requests identify as `EsteBot/1.0 (+https://wallace.woztech.world/bot)`; the info page lives at `/bot`.
 
 ---
 
 ## Known Limitations & Roadmap
 
-- **SSRF risk:** both API routes fetch any user-supplied URL from the server, including `localhost` and private/internal IPs. Add a hostname/IP allowlist or block private ranges (and rate limiting) before exposing this publicly.
-- The bot User-Agent still points at a placeholder (`https://yourdomain.com/bot`) in `src/app/api/audit/route.js`.
-- The Security Audit page has no loading/error UI — a failed request leaves the page with an error payload that `SecurityAuditSection` can't render.
 - Header checks are presence-only; header *values* (e.g. weak CSP, short HSTS `max-age`) aren't evaluated.
+- Canonical comparison is an exact string match, so `https://example.com` vs `https://example.com/` or relative canonicals are flagged as mismatches.
+- An empty `<body>` reports a word count of 1.
 - Internal/external link classification is a simple string match on the host.
 - `ScoreCard` and the `ok` flags on title/description aren't yet surfaced in the SEO report UI.
-- `lucide-react` and `@tailwindcss/line-clamp` are installed but not currently used (line-clamp is built into Tailwind v4).
 - No automated tests yet.
 
 ---

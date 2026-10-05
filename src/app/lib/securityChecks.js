@@ -1,20 +1,25 @@
+import { safeFetch } from "./safeFetch"
+
 export async function runSecurityChecks(inputUrl) {
-    const url = inputUrl.startsWith("http")
+    const url = /^https?:\/\//i.test(inputUrl)
       ? inputUrl
       : `https://${inputUrl}`
-  
-    const res = await fetch(url, {
-      redirect: "manual"
+
+    // Headers are read from the first response, so redirects aren't followed.
+    const res = await safeFetch(url, {
+      timeout: 10000,
+      maxRedirects: 0,
+      readBody: false
     })
-  
-    const headers = Object.fromEntries(res.headers.entries())
-  
+
+    const headers = res.headers
+
     const checks = {
       transport: {
-        https: url.startsWith("https"),
+        https: res.url.startsWith("https:"),
         hsts: !!headers["strict-transport-security"]
       },
-  
+
       headers: {
         csp: !!headers["content-security-policy"],
         xFrame: !!headers["x-frame-options"],
@@ -22,17 +27,16 @@ export async function runSecurityChecks(inputUrl) {
         referrerPolicy: !!headers["referrer-policy"],
         permissionsPolicy: !!headers["permissions-policy"]
       },
-  
+
       exposure: {
         server: headers["server"] || null,
         xPoweredBy: headers["x-powered-by"] || null
       }
     }
-  
+
     return {
-      url,
+      url: res.url,
       status: res.status,
       checks
     }
   }
-  
