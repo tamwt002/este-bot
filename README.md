@@ -69,7 +69,7 @@ Built by [Tinotenda Tamangani](https://wallace.woztech.world) / WozTech.
 ### Install & run
 
 ```bash
-git clone <repo-url> este-bot
+git clone https://github.com/tamwt002/este-bot.git
 cd este-bot
 npm install
 npm run dev
