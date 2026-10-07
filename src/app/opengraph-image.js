@@ -1,10 +1,15 @@
 import { ImageResponse } from "next/og"
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
 
 export const alt = "EsteBot – SEO and security audits for any website"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const logo = await readFile(join(process.cwd(), "src/assets/logo.png"))
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`
+
   return new ImageResponse(
     (
       <div
@@ -20,7 +25,8 @@ export default function OpengraphImage() {
           fontFamily: "sans-serif"
         }}
       >
-        <div style={{ display: "flex", fontSize: 32, fontWeight: 700 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 36, fontWeight: 700 }}>
+          <img src={logoSrc} width={64} height={64} alt="" />
           EsteBot
         </div>
 

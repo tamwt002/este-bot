@@ -25,12 +25,12 @@ export default function FindingsReport({ report, kind, children }) {
   return (
     <div className="space-y-8">
       {/* SUMMARY */}
-      <div className="bg-white border rounded-xl p-6 shadow-sm flex flex-col sm:flex-row gap-6 sm:items-center">
+      <div className="bg-white border rounded-xl p-4 sm:p-6 shadow-sm flex gap-4 sm:gap-6 items-center">
         <div
-          className={`${GRADE_STYLES[summary.grade]} text-white rounded-2xl w-24 h-24 flex flex-col items-center justify-center shrink-0`}
+          className={`${GRADE_STYLES[summary.grade]} text-white rounded-2xl w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center shrink-0`}
         >
-          <span className="text-5xl font-bold leading-none">{summary.grade}</span>
-          <span className="text-sm mt-1 opacity-90">{summary.score}/100</span>
+          <span className="text-4xl sm:text-5xl font-bold leading-none">{summary.grade}</span>
+          <span className="text-xs sm:text-sm mt-1 opacity-90">{summary.score}/100</span>
         </div>
 
         <div className="space-y-2 min-w-0">
@@ -129,22 +129,26 @@ function FindingCard({ finding: f, url }) {
     }
   }
 
+  const copyButton = (
+    <button
+      type="button"
+      onClick={copyPrompt}
+      className="text-xs px-3 py-1.5 rounded-lg border border-zinc-300 hover:bg-zinc-100 transition shrink-0 whitespace-nowrap"
+    >
+      {copied ? "Copied ✓" : "Copy fix prompt"}
+    </button>
+  )
+
   return (
-    <div className={`bg-white border border-l-4 ${style.border} rounded-xl p-5 shadow-sm space-y-3`}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
+    <div className={`bg-white border border-l-4 ${style.border} rounded-xl p-4 sm:p-5 shadow-sm space-y-3`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
           <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${style.badge}`}>
             {style.label}
           </span>
           <h3 className="font-semibold">{f.title}</h3>
         </div>
-        <button
-          type="button"
-          onClick={copyPrompt}
-          className="text-xs px-3 py-1.5 rounded-lg border border-zinc-300 hover:bg-zinc-100 transition shrink-0"
-        >
-          {copied ? "Copied ✓" : "Copy fix prompt"}
-        </button>
+        <div className="hidden sm:block">{copyButton}</div>
       </div>
 
       <p className="text-sm text-zinc-700">{f.detail}</p>
@@ -159,6 +163,8 @@ function FindingCard({ finding: f, url }) {
         <span className="font-medium">How to fix: </span>
         <span className="text-zinc-700">{f.fix}</span>
       </p>
+
+      <div className="sm:hidden pt-1">{copyButton}</div>
     </div>
   )
 }
