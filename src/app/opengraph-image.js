@@ -57,7 +57,7 @@ export default async function OpengraphImage() {
             </div>
           ))}
           <div style={{ display: "flex", marginLeft: "auto", alignSelf: "center", fontSize: 26, color: "#71717a" }}>
-            woztech.world/Esteban
+            estebot.woztech.world
           </div>
         </div>
       </div>

@@ -25,7 +25,7 @@ export default function SecurityAuditPage() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH}/api/security-audit`, {
+      const res = await fetch("/api/security-audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url, consent }),

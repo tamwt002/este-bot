@@ -11,18 +11,18 @@ export default function PrivacyPage() {
     <article className="max-w-3xl space-y-10">
       <header className="space-y-3">
         <h1 className="text-4xl font-bold">Privacy Policy</h1>
-        <p className="text-sm text-zinc-500">Last updated: 5 October 2026</p>
+        <p className="text-sm text-zinc-500">Last updated: 8 October 2026</p>
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-900">
-          <strong>In short:</strong> no accounts, no cookies, no analytics, no ads. The URLs you
-          scan and the results are not saved. Your IP address is held in memory for about a minute
-          for rate limiting.
+          <strong>In short:</strong> no accounts, no cookies, no ads. We count page visits with
+          cookie-free, anonymous analytics. The URLs you scan and the results are not saved. Your IP
+          address is held in memory for about a minute for rate limiting.
         </div>
       </header>
 
       <LegalSection title="1. Who we are">
         <p>
           EsteBot is operated by WozTech (&quot;we&quot;, &quot;us&quot;). This policy explains what
-          information the EsteBot website at <code>woztech.world/Esteban</code> handles when you use it.
+          information the EsteBot website at <code>estebot.woztech.world</code> handles when you use it.
         </p>
       </LegalSection>
 
@@ -47,6 +47,12 @@ export default function PrivacyPage() {
             enforce rate limits and prevent abuse. It is not written to a database.
           </li>
           <li>
+            <strong>Anonymous usage analytics.</strong> We use Vercel Web Analytics to count page
+            views and see which pages are used. It records the page visited, the referring site,
+            and general device, browser and country information. It uses no cookies, and doesn&apos;t
+            identify you or track you across other websites. The URLs you scan are not sent to it.
+          </li>
+          <li>
             <strong>Hosting and error logs.</strong> Like any website, our hosting provider may
             automatically record standard request information (IP address, time, requested path,
             browser user agent) for security and reliability, and our server may log technical
@@ -59,7 +65,7 @@ export default function PrivacyPage() {
       <LegalSection title="3. What we don't do">
         <ul>
           <li>No user accounts, sign-ups or email collection.</li>
-          <li>No cookies, analytics, tracking pixels or advertising.</li>
+          <li>No cookies, cross-site tracking, tracking pixels or advertising.</li>
           <li>No selling, renting or sharing of your information for marketing.</li>
           <li>
             Fonts are served from our own server, so loading the site doesn&apos;t send your

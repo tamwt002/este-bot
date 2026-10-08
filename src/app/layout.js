@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 // SEO metadata (Top-level export)
 // Social preview images come from opengraph-image.js / twitter-image.js
 export const metadata = {
-  metadataBase: new URL("https://www.woztech.world/Esteban"),
+  metadataBase: new URL("https://estebot.woztech.world"),
   title: "EsteBot | In Depth Auditors",
   description: "Check your vibe-coded site before launch: SEO and security audits for apps built with Lovable, Bolt, v0, Cursor and Replit.",
   keywords: ["Cyber Security", "SEO", "Insights"],

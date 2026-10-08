@@ -28,7 +28,7 @@ export default function BotPage() {
       <div className="bg-white border rounded-xl p-6 shadow-sm space-y-3">
         <h2 className="font-semibold text-lg">User agent</h2>
         <pre className="bg-zinc-100 p-3 rounded text-sm overflow-auto">
-          Mozilla/5.0 (compatible; EsteBot/1.0; +https://www.woztech.world/Esteban/bot)
+          Mozilla/5.0 (compatible; EsteBot/1.0; +https://estebot.woztech.world/bot)
         </pre>
       </div>
 

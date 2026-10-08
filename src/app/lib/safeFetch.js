@@ -5,7 +5,7 @@ import https from "https"
 import net from "net"
 
 export const USER_AGENT =
-  "Mozilla/5.0 (compatible; EsteBot/1.0; +https://www.woztech.world/Esteban/bot)"
+  "Mozilla/5.0 (compatible; EsteBot/1.0; +https://estebot.woztech.world/bot)"
 
 const ALLOWED_PROTOCOLS = new Set(["http:", "https:"])
 const ALLOWED_PORTS = new Set(["", "80", "443"])
