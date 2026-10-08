@@ -2,6 +2,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next"
 
 // Google font
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -36,6 +37,7 @@ export default function RootLayout({ children }) {
         <Navbar />
         <main className="max-w-6xl w-full mx-auto px-6 py-10 flex-1">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
