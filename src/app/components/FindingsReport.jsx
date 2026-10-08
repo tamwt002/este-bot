@@ -1,94 +1,145 @@
 "use client"
 import { useState } from "react"
+import Icon from "./Icon"
 
-const SEVERITY_STYLES = {
-  critical: { label: "Critical", badge: "bg-red-600 text-white", border: "border-l-red-600" },
-  high: { label: "High", badge: "bg-orange-500 text-white", border: "border-l-orange-500" },
-  medium: { label: "Medium", badge: "bg-amber-400 text-zinc-900", border: "border-l-amber-400" },
-  low: { label: "Low", badge: "bg-zinc-200 text-zinc-800", border: "border-l-zinc-300" },
-  info: { label: "Heads up", badge: "bg-sky-100 text-sky-800", border: "border-l-sky-300" }
+const SEVERITY = {
+  critical: { label: "Critical", icon: "octagon", color: "var(--critical)" },
+  high: { label: "High", icon: "triangle", color: "var(--high)" },
+  medium: { label: "Medium", icon: "circleAlert", color: "var(--medium)" },
+  low: { label: "Low", icon: "minus", color: "var(--low)" },
+  info: { label: "Heads up", icon: "info", color: "var(--info)" }
 }
 
-const GRADE_STYLES = {
-  A: "bg-green-600",
-  B: "bg-lime-600",
-  C: "bg-amber-500",
-  D: "bg-orange-500",
-  F: "bg-red-600"
+const GROUPS = [
+  { title: "Fix these first", hint: "These can hurt you right now.", severities: ["critical", "high"], open: true },
+  { title: "Then these", hint: "Worth sorting before you launch.", severities: ["medium"] },
+  { title: "Polish", hint: "Small wins when you have a minute.", severities: ["low"] },
+  { title: "Worth checking yourself", hint: "Things I can't test from outside.", severities: ["info"] }
+]
+
+const GRADES = {
+  A: { color: "var(--pass)", line: "Sweet as! Your site's in great shape." },
+  B: { color: "var(--grade-b)", line: "Pretty good! Just a few things to tidy up." },
+  C: { color: "var(--medium)", line: "Not bad, but there's some work to do." },
+  D: { color: "var(--high)", line: "Hmm. A few things need fixing before launch." },
+  F: { color: "var(--critical)", line: "Yikes. Let's fix the big ones first, together." }
 }
+
+const tint = (color, pct) => `color-mix(in oklch, ${color} ${pct}%, transparent)`
 
 export default function FindingsReport({ report, kind, children }) {
   const { summary, findings, passed, stack, url } = report
+  const grade = GRADES[summary.grade]
   const issues = findings.filter(f => f.severity !== "info")
-  const notes = findings.filter(f => f.severity === "info")
+  const urgent = summary.counts.critical + summary.counts.high
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-rise">
       {/* SUMMARY */}
-      <div className="bg-white border rounded-xl p-4 sm:p-6 shadow-sm flex gap-4 sm:gap-6 items-center">
-        <div
-          className={`${GRADE_STYLES[summary.grade]} text-white rounded-2xl w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center shrink-0`}
-        >
-          <span className="text-4xl sm:text-5xl font-bold leading-none">{summary.grade}</span>
-          <span className="text-xs sm:text-sm mt-1 opacity-90">{summary.score}/100</span>
-        </div>
+      <section className="panel p-5 sm:p-7">
+        <div className="flex gap-5 sm:gap-7 items-center">
+          <div
+            className="grid place-items-center shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-3xl border-2"
+            style={{
+              color: grade.color,
+              borderColor: grade.color,
+              background: tint(grade.color, 14),
+              boxShadow: `0 5px 0 ${tint(grade.color, 55)}`
+            }}
+          >
+            <div className="text-center leading-none">
+              <span className="block text-5xl sm:text-7xl font-black">{summary.grade}</span>
+              <span className="block mt-1 text-xs sm:text-sm font-extrabold opacity-90">
+                {summary.score}/100
+              </span>
+            </div>
+          </div>
 
-        <div className="space-y-2 min-w-0">
-          <h2 className="text-xl font-semibold">{kind} report</h2>
-          <p className="text-sm text-zinc-500 break-all">{url}</p>
-          {stack?.length > 0 && (
-            <p className="text-sm text-zinc-600">
-              Detected: <strong>{stack.join(" · ")}</strong>
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2 text-xs">
-            {["critical", "high", "medium", "low"].map(s =>
-              summary.counts[s] > 0 ? (
-                <span key={s} className={`px-2 py-1 rounded-full ${SEVERITY_STYLES[s].badge}`}>
-                  {summary.counts[s]} {SEVERITY_STYLES[s].label}
-                </span>
-              ) : null
-            )}
-            <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
-              {passed.length} passed
-            </span>
+          <div className="min-w-0 space-y-1.5">
+            <p className="text-sm font-extrabold text-muted">{kind} report</p>
+            <h2 className="text-xl sm:text-3xl font-black tracking-tight">{grade.line}</h2>
+            <p className="text-sm text-muted break-all">{url}</p>
           </div>
         </div>
-      </div>
 
-      {/* ISSUES */}
-      {issues.length === 0 ? (
-        <div className="p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
-          No issues found. Nice work.
+        <div className="mt-6 pt-5 border-t-2 border-line flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold">
+            {urgent > 0 && (
+              <Stat color="var(--critical)" icon="octagon">
+                {urgent} to fix first
+              </Stat>
+            )}
+            {issues.length - urgent > 0 && (
+              <Stat color="var(--medium)" icon="circleAlert">
+                {issues.length - urgent} more to tidy
+              </Stat>
+            )}
+            <Stat color="var(--pass)" icon="checkCircle">
+              {passed.length} passed
+            </Stat>
+            {stack?.length > 0 && (
+              <li className="text-muted font-semibold">Built with {stack.join(" + ")}</li>
+            )}
+          </ul>
+
+          {findings.length > 0 && <CopyAllButton findings={findings} url={url} kind={kind} />}
         </div>
-      ) : (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold">What to fix ({issues.length})</h2>
-          {issues.map((f, i) => (
-            <FindingCard key={`${f.id}-${i}`} finding={f} url={url} />
-          ))}
-        </section>
+      </section>
+
+      {/* NOTHING TO FIX */}
+      {issues.length === 0 && (
+        <div
+          className="flex gap-3 items-center rounded-2xl border-2 px-5 py-4 font-bold"
+          style={{ borderColor: tint("var(--pass)", 50), background: tint("var(--pass)", 12) }}
+        >
+          <Icon name="checkCircle" className="w-6 h-6 shrink-0 text-pass" />
+          No issues found. Your kiwi is proud of you.
+        </div>
       )}
 
-      {/* NOTES */}
-      {notes.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold">Worth checking</h2>
-          {notes.map((f, i) => (
-            <FindingCard key={`${f.id}-${i}`} finding={f} url={url} />
-          ))}
-        </section>
-      )}
+      {/* GROUPED FINDINGS */}
+      {GROUPS.map(group => ({
+        ...group,
+        items: findings.filter(f => group.severities.includes(f.severity))
+      }))
+        .filter(group => group.items.length > 0)
+        .map((group, index) => {
+        const { items } = group
+        // "Then these" only makes sense after "Fix these first".
+        const title = index === 0 && group.title === "Then these" ? "Start here" : group.title
+        return (
+          <section key={group.title} aria-label={title}>
+            <div className="flex items-baseline justify-between gap-3 mb-3">
+              <h3 className="text-lg font-black">
+                {title} <span className="text-subtle font-extrabold">({items.length})</span>
+              </h3>
+              <p className="text-sm text-muted hidden sm:block">{group.hint}</p>
+            </div>
+            <ul className="panel divide-y-2 divide-line overflow-hidden">
+              {items.map((f, i) => (
+                <FindingRow key={`${f.id}-${i}`} finding={f} url={url} defaultOpen={group.open} />
+              ))}
+            </ul>
+          </section>
+        )
+      })}
 
       {/* PASSED */}
       {passed.length > 0 && (
-        <details className="bg-white border rounded-xl p-6 shadow-sm">
-          <summary className="font-semibold cursor-pointer">
-            Passed checks ({passed.length})
+        <details className="panel group">
+          <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-5 py-4 font-extrabold [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-2.5">
+              <Icon name="checkCircle" className="w-5 h-5 text-pass" />
+              Passed checks ({passed.length})
+            </span>
+            <Icon name="chevron" className="w-5 h-5 text-muted transition-transform group-open:rotate-180" />
           </summary>
-          <ul className="mt-4 space-y-1 text-sm text-zinc-700">
+          <ul className="px-5 pb-5 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-muted">
             {passed.map(p => (
-              <li key={p}>✓ {p}</li>
+              <li key={p} className="flex gap-2">
+                <Icon name="check" className="w-4 h-4 mt-0.5 shrink-0 text-pass" strokeWidth={3} />
+                {p}
+              </li>
             ))}
           </ul>
         </details>
@@ -96,75 +147,130 @@ export default function FindingsReport({ report, kind, children }) {
 
       {/* RAW DETAILS */}
       {children && (
-        <details className="bg-white border rounded-xl p-6 shadow-sm">
-          <summary className="font-semibold cursor-pointer">Technical details</summary>
-          <div className="mt-6">{children}</div>
+        <details className="panel group">
+          <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-5 py-4 font-extrabold [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-2.5">
+              <Icon name="file" className="w-5 h-5 text-muted" />
+              Technical details
+            </span>
+            <Icon name="chevron" className="w-5 h-5 text-muted transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="px-5 pb-5">{children}</div>
         </details>
       )}
     </div>
   )
 }
 
-function FindingCard({ finding: f, url }) {
+function Stat({ color, icon, children }) {
+  return (
+    <li className="flex items-center gap-1.5">
+      <span style={{ color }}>
+        <Icon name={icon} className="w-4.5 h-4.5" />
+      </span>
+      {children}
+    </li>
+  )
+}
+
+function useCopy() {
   const [copied, setCopied] = useState(false)
-  const style = SEVERITY_STYLES[f.severity]
-
-  async function copyPrompt() {
-    const prompt = [
-      `EsteBot found this issue on my site (${url}):`,
-      "",
-      `${f.title}`,
-      f.detail,
-      f.evidence ? `\nEvidence: ${f.evidence}` : "",
-      "",
-      `Please fix it: ${f.fix}`
-    ].join("\n")
-
+  async function copy(text) {
     try {
-      await navigator.clipboard.writeText(prompt)
+      await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
       setCopied(false)
     }
   }
+  return [copied, copy]
+}
 
-  const copyButton = (
-    <button
-      type="button"
-      onClick={copyPrompt}
-      className="text-xs px-3 py-1.5 rounded-lg border border-zinc-300 hover:bg-zinc-100 transition shrink-0 whitespace-nowrap"
-    >
-      {copied ? "Copied ✓" : "Copy fix prompt"}
-    </button>
-  )
+function CopyAllButton({ findings, url, kind }) {
+  const [copied, copy] = useCopy()
+
+  function buildPrompt() {
+    const lines = [
+      `EsteBot ran a ${kind.toLowerCase()} audit on my site (${url}) and found the issues below.`,
+      "Please fix them in this order. Explain any change that needs me to act outside the code (dashboards, DNS, rotating keys).",
+      ""
+    ]
+    findings.forEach((f, i) => {
+      lines.push(`${i + 1}. [${SEVERITY[f.severity].label}] ${f.title}`)
+      lines.push(`   Why it matters: ${f.detail}`)
+      if (f.evidence) lines.push(`   Evidence: ${f.evidence}`)
+      lines.push(`   Fix: ${f.fix}`)
+      lines.push("")
+    })
+    return lines.join("\n")
+  }
 
   return (
-    <div className={`bg-white border border-l-4 ${style.border} rounded-xl p-4 sm:p-5 shadow-sm space-y-3`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
-          <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${style.badge}`}>
-            {style.label}
+    <button type="button" onClick={() => copy(buildPrompt())} className="btn-primary text-sm py-2.5 px-4 shrink-0">
+      <Icon name={copied ? "check" : "copy"} className="w-4 h-4" strokeWidth={2.75} />
+      {copied ? "Copied! Paste it into your AI tool" : `Copy all ${findings.length} fixes as one prompt`}
+    </button>
+  )
+}
+
+function FindingRow({ finding: f, url, defaultOpen }) {
+  const [copied, copy] = useCopy()
+  const sev = SEVERITY[f.severity]
+
+  function copyPrompt() {
+    copy(
+      [
+        `EsteBot found this issue on my site (${url}):`,
+        "",
+        f.title,
+        f.detail,
+        f.evidence ? `\nEvidence: ${f.evidence}` : "",
+        "",
+        `Please fix it: ${f.fix}`
+      ].join("\n")
+    )
+  }
+
+  return (
+    <li>
+      <details className="group" open={defaultOpen}>
+        <summary className="flex items-center gap-3 sm:gap-4 cursor-pointer list-none px-4 sm:px-5 py-4 hover:bg-raised transition-colors [&::-webkit-details-marker]:hidden">
+          <span
+            className="grid place-items-center w-9 h-9 rounded-xl shrink-0"
+            style={{ color: sev.color, background: tint(sev.color, 16) }}
+          >
+            <Icon name={sev.icon} className="w-5 h-5" />
           </span>
-          <h3 className="font-semibold">{f.title}</h3>
+          <span className="min-w-0 flex-1">
+            <span className="block font-extrabold leading-snug">{f.title}</span>
+            <span className="block text-xs font-extrabold mt-0.5" style={{ color: sev.color }}>
+              {sev.label}
+            </span>
+          </span>
+          <Icon name="chevron" className="w-5 h-5 text-muted shrink-0 transition-transform group-open:rotate-180" />
+        </summary>
+
+        <div className="px-4 sm:px-5 pb-5 sm:pl-[4.25rem] space-y-3">
+          <p className="text-muted max-w-[70ch]">{f.detail}</p>
+
+          {f.evidence && (
+            <p className="text-xs font-mono bg-raised border-2 border-line rounded-lg px-3 py-2 break-all text-ink">
+              {f.evidence}
+            </p>
+          )}
+
+          <div className="rounded-xl bg-raised px-4 py-3">
+            <p className="text-xs font-black text-accent-text mb-1">How to fix</p>
+            <p className="text-sm text-ink max-w-[70ch]">{f.fix}</p>
+          </div>
+
+          <button type="button" onClick={copyPrompt} className="btn-secondary">
+            <Icon name={copied ? "check" : "copy"} className="w-4 h-4" strokeWidth={2.75} />
+            {copied ? "Copied!" : "Copy fix prompt"}
+          </button>
         </div>
-        <div className="hidden sm:block">{copyButton}</div>
-      </div>
-
-      <p className="text-sm text-zinc-700">{f.detail}</p>
-
-      {f.evidence && (
-        <p className="text-xs font-mono bg-zinc-100 rounded px-2 py-1 break-all">
-          {f.evidence}
-        </p>
-      )}
-
-      <p className="text-sm">
-        <span className="font-medium">How to fix: </span>
-        <span className="text-zinc-700">{f.fix}</span>
-      </p>
-
-      <div className="sm:hidden pt-1">{copyButton}</div>
-    </div>
+      </details>
+    </li>
   )
 }

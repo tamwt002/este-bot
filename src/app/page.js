@@ -1,96 +1,60 @@
 "use client"
 
-import { useState } from "react"
-import UrlForm from "./components/UrlForm"
+import AuditPage from "./components/AuditPage"
 import AuditSection from "./components/AuditSection"
-import FindingsReport from "./components/FindingsReport"
+
+const STEPS = [
+  "Fetching your page",
+  "Reading titles, descriptions and headings",
+  "Checking robots.txt and sitemap",
+  "Looking for blank-page problems",
+  "Working out your score"
+]
+
+const CHECKS = [
+  {
+    title: "Can Google see it?",
+    icon: "eye",
+    items: [
+      "Blank pages from client-side React apps",
+      "Leftover noindex tags",
+      "robots.txt blocking everyone",
+      "sitemap.xml"
+    ]
+  },
+  {
+    title: "Template leftovers",
+    icon: "file",
+    items: [
+      "\"Vite + React\" style titles",
+      "Default descriptions and favicons",
+      "Builder placeholder share images",
+      "localhost links in your metadata"
+    ]
+  },
+  {
+    title: "The basics",
+    icon: "search",
+    items: [
+      "Title and description length",
+      "Headings, alt text, mobile viewport",
+      "Social previews (Open Graph)",
+      "Structured data and HTTPS"
+    ]
+  }
+]
 
 export default function SeoAuditPage() {
-  const [report, setReport] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  async function runAudit(input) {
-    setError(null)
-    setReport(null)
-
-    const url = /^https?:\/\//i.test(input) ? input : `https://${input}`
-
-    try {
-      new URL(url)
-    } catch {
-      setError("Please enter a valid URL.")
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const res = await fetch("/api/audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-        signal: AbortSignal.timeout(45000)
-      })
-
-      const data = await res.json()
-
-      if (!res.ok || !data.findings) {
-        setError(data.error || "Something went wrong.")
-      } else {
-        setReport(data)
-
-        setTimeout(() => {
-          document
-            .getElementById("audit-results")
-            ?.scrollIntoView({ behavior: "smooth" })
-        }, 150)
-      }
-    } catch (err) {
-      setError(
-        err.name === "TimeoutError"
-          ? "The audit timed out. Try again."
-          : "Network error. Try again."
-      )
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <h1 className="text-4xl font-bold">SEO Audit</h1>
-        <p className="text-zinc-600 max-w-2xl">
-          Built your site with Lovable, Bolt, v0, Cursor or Replit? Check whether Google
-          can actually see it. EsteBot looks for the SEO mistakes AI-built sites make most,
-          like blank pages for crawlers, template titles and leftover noindex tags, and gives
-          you a prompt to paste back into your AI tool to fix each one.
-        </p>
-      </div>
-
-      <UrlForm onSubmit={runAudit} loading={loading} />
-
-      {error && (
-        <div className="p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {loading && (
-        <div className="flex items-center gap-3 text-zinc-600">
-          <div className="animate-spin h-5 w-5 border-2 border-zinc-400 border-t-transparent rounded-full" />
-          Running audit…
-        </div>
-      )}
-
-      {report && (
-        <div id="audit-results">
-          <FindingsReport report={report} kind="SEO">
-            <AuditSection report={report} />
-          </FindingsReport>
-        </div>
-      )}
-    </div>
+    <AuditPage
+      kind="SEO"
+      endpoint="/api/audit"
+      title="Can Google actually see your site?"
+      intro="Built with Lovable, Bolt, v0, Cursor or Replit? Paste your URL and EsteBot checks for the SEO mistakes AI-built sites make most, then hands you a fix prompt for each one."
+      greeting="Kia ora! Kiwis have nostrils on the tip of their beak. I'll sniff out what Google can't see."
+      steps={STEPS}
+      checks={CHECKS}
+      Details={AuditSection}
+    />
   )
 }

@@ -10,9 +10,9 @@ export default function DisclaimerPage() {
   return (
     <article className="max-w-3xl space-y-10">
       <header className="space-y-3">
-        <h1 className="text-4xl font-bold">Disclaimer &amp; Acceptable Use</h1>
-        <p className="text-sm text-zinc-500">Last updated: 5 October 2026</p>
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Disclaimer &amp; Acceptable Use</h1>
+        <p className="text-sm text-muted">Last updated: 5 October 2026</p>
+        <div className="callout-warn">
           <strong>In short:</strong> EsteBot is for checking <em>your own</em> websites, or sites
           you have written permission to test. It is not a tool for finding, collecting or
           exploiting other people&apos;s secrets, data or weaknesses. Using it that way is

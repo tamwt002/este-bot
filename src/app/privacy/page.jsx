@@ -10,9 +10,9 @@ export default function PrivacyPage() {
   return (
     <article className="max-w-3xl space-y-10">
       <header className="space-y-3">
-        <h1 className="text-4xl font-bold">Privacy Policy</h1>
-        <p className="text-sm text-zinc-500">Last updated: 8 October 2026</p>
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-900">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Privacy Policy</h1>
+        <p className="text-sm text-muted">Last updated: 8 October 2026</p>
+        <div className="callout-ok">
           <strong>In short:</strong> no accounts, no cookies, no ads. We count page visits with
           cookie-free, anonymous analytics. The URLs you scan and the results are not saved. Your IP
           address is held in memory for about a minute for rate limiting.

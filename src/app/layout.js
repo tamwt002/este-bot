@@ -1,11 +1,14 @@
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next"
 
-// Google font
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+// Rounded, friendly sans used for everything (self-hosted by next/font)
+const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
+
+// Applies the saved theme before first paint (dark is the default).
+const themeScript = `try{if(localStorage.getItem("theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}`;
 
 // SEO metadata (Top-level export)
 // Social preview images come from opengraph-image.js / twitter-image.js
@@ -30,12 +33,19 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  themeColor: "#1c1611",
+};
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="bg-zinc-50 text-zinc-900 font-sans min-h-screen flex flex-col">
+    <html lang="en" className={nunito.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="bg-bg text-ink font-sans min-h-screen flex flex-col">
         <Navbar />
-        <main className="max-w-6xl w-full mx-auto px-6 py-10 flex-1">{children}</main>
+        <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1">{children}</main>
         <Footer />
         <Analytics />
       </body>

@@ -1,111 +1,58 @@
+import { DataList, Row, Block, Code } from "./DataList"
+
 export default function AuditSection({ report }) {
-  const { onPage } = report
+  const { onPage, robotsTxt } = report
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
+      <DataList title="Page">
+        <Row label="Title" value={onPage.title.value} hint={`${onPage.title.length} chars`} />
+        <Row label="Description" value={onPage.metaDescription.value} hint={`${onPage.metaDescription.length} chars`} />
+        <Row label="Canonical" value={onPage.canonical.value} />
+        <Row label="Robots" value={onPage.robots.value} />
+        <Row label="Viewport" value={onPage.viewport.value} />
+        <Row label="Words" value={String(onPage.content.wordCount)} />
+        <Row label="Images" value={`${onPage.images.total} total, ${onPage.images.missingAlt} missing alt`} />
+        <Row label="Links" value={`${onPage.links.internalCount} internal, ${onPage.links.externalCount} external`} />
+        <Row label="HTTPS" value={onPage.security.https ? "Yes" : "No"} />
+      </DataList>
 
-      {/* TITLE */}
-      <Section title="Title Tag">
-        <p>{onPage.title.value || "Missing"}</p>
-        <p className="text-sm text-zinc-500">
-          {onPage.title.length} characters
-        </p>
-      </Section>
-
-      {/* META DESCRIPTION */}
-      <Section title="Meta Description">
-        <p>{onPage.metaDescription.value || "Missing"}</p>
-        <p className="text-sm text-zinc-500">
-          {onPage.metaDescription.length} characters
-        </p>
-      </Section>
-
-      {/* CANONICAL */}
-      <Section title="Canonical URL">
-        <p>{onPage.canonical.value || "Missing"}</p>
-        {onPage.canonical.mismatch && (
-          <p className="text-red-600 text-sm mt-2">
-            Canonical does not match page URL.
-          </p>
-        )}
-      </Section>
-
-      {/* ROBOTS */}
-      <Section title="Robots Meta Tag">
-        <p>{onPage.robots.value || "Missing"}</p>
-      </Section>
-
-      {/* VIEWPORT */}
-      <Section title="Viewport">
-        <p>{onPage.viewport.value || "Missing"}</p>
-      </Section>
-
-      {/* HEADINGS */}
-      <Section title="Headings">
-        <ul className="space-y-2">
-          {onPage.headings.all.map((h, i) => (
-            <li key={i}>
-              <strong>{h.tag.toUpperCase()}</strong> — {h.text}
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      {/* WORD COUNT */}
-      <Section title="Content">
-        <p>Word count: {onPage.content.wordCount}</p>
-      </Section>
-
-      {/* IMAGES */}
-      <Section title="Images">
-        <p>Total: {onPage.images.total}</p>
-        <p>Missing alt: {onPage.images.missingAlt}</p>
-      </Section>
-
-      {/* LINKS */}
-      <Section title="Links">
-        <p>Internal: {onPage.links.internalCount}</p>
-        <p>External: {onPage.links.externalCount}</p>
-      </Section>
-
-      {/* OPEN GRAPH */}
-      <Section title="Open Graph">
-        <pre className="bg-zinc-100 p-3 rounded text-sm overflow-auto">
-          {JSON.stringify(onPage.openGraph, null, 2)}
-        </pre>
-      </Section>
-
-      {/* TWITTER */}
-      <Section title="Twitter Cards">
-        <pre className="bg-zinc-100 p-3 rounded text-sm overflow-auto">
-          {JSON.stringify(onPage.twitter, null, 2)}
-        </pre>
-      </Section>
-
-      {/* SCHEMA */}
-      <Section title="Structured Data">
-        {onPage.schema.length === 0 ? (
-          <p>No structured data found.</p>
+      <Block title="Headings">
+        {onPage.headings.all.length === 0 ? (
+          <p className="text-sm text-muted">No headings found.</p>
         ) : (
-          <pre className="bg-zinc-100 p-3 rounded text-sm overflow-auto">
-            {JSON.stringify(onPage.schema, null, 2)}
-          </pre>
+          <ul className="space-y-1 text-sm">
+            {onPage.headings.all.map((h, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="font-mono text-xs font-bold text-accent-text w-7 shrink-0 pt-0.5">
+                  {h.tag.toUpperCase()}
+                </span>
+                <span className="text-ink">{h.text || <em className="text-subtle">(empty)</em>}</span>
+              </li>
+            ))}
+          </ul>
         )}
-      </Section>
+      </Block>
 
-      {/* SECURITY */}
-      <Section title="Security">
-        <p>HTTPS: {onPage.security.https ? "Yes" : "No"}</p>
-      </Section>
-    </div>
-  )
-}
+      <Block title="Open Graph">
+        <Code>{JSON.stringify(onPage.openGraph, null, 2)}</Code>
+      </Block>
 
-function Section({ title, children }) {
-  return (
-    <div className="bg-white border rounded-xl p-6 shadow-sm">
-      <h2 className="font-semibold text-lg mb-3">{title}</h2>
-      {children}
+      <Block title="Twitter card">
+        <Code>{JSON.stringify(onPage.twitter, null, 2)}</Code>
+      </Block>
+
+      <Block title="Structured data">
+        {onPage.schema.length === 0 ? (
+          <p className="text-sm text-muted">No structured data found.</p>
+        ) : (
+          <Code>{JSON.stringify(onPage.schema, null, 2)}</Code>
+        )}
+      </Block>
+
+      <Block title="robots.txt">
+        {robotsTxt ? <Code>{robotsTxt}</Code> : <p className="text-sm text-muted">Not found.</p>}
+      </Block>
     </div>
   )
 }
