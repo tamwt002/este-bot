@@ -3,7 +3,7 @@ import Link from "next/link"
 export default function Footer() {
   return (
     <footer className="border-t-2 border-line">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm text-muted">
+      <div className="page-container py-6 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm text-muted">
         <p>
           © {new Date().getFullYear()} WozTech. Only scan sites you own or are authorised to test.
         </p>
