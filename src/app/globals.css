@@ -37,6 +37,10 @@
   --grade-b: oklch(0.8 0.15 125);
 
   --focus: oklch(0.83 0.15 68);
+
+  /* Cartoon outlines + hard offset shadows (Happy Hues style) */
+  --stroke: oklch(0.56 0.035 62);
+  --shadow: oklch(0.4 0.045 58);
 }
 
 :root[data-theme="light"] {
@@ -68,6 +72,9 @@
   --grade-b: oklch(0.55 0.14 130);
 
   --focus: oklch(0.6 0.15 52);
+
+  --stroke: oklch(0.23 0.02 55);
+  --shadow: oklch(0.23 0.02 55);
 }
 
 @theme inline {
@@ -95,6 +102,7 @@
   --color-info: var(--info);
   --color-pass: var(--pass);
   --color-grade-b: var(--grade-b);
+  --color-stroke: var(--stroke);
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -148,18 +156,19 @@
 }
 
 @layer components {
-  /* Chunky, pressable primary button (kiwi orange). */
+  /* Outlined, flat button that lifts on hover and presses into its shadow. */
   .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     border-radius: 0.875rem;
+    border: 2.5px solid var(--stroke);
     background: var(--accent);
     color: var(--on-accent);
     font-weight: 800;
     padding: 0.75rem 1.5rem;
-    box-shadow: 0 4px 0 var(--accent-press);
+    box-shadow: 4px 4px 0 var(--shadow);
     transition:
       transform 120ms var(--ease-out-quart),
       box-shadow 120ms var(--ease-out-quart),
@@ -167,49 +176,64 @@
   }
   .btn-primary:hover:not(:disabled) {
     background: var(--accent-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--shadow);
   }
   .btn-primary:active:not(:disabled) {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 var(--accent-press);
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--shadow);
   }
   .btn-primary:disabled {
     background: var(--raised);
     color: var(--subtle);
-    box-shadow: 0 4px 0 var(--line);
+    border-color: var(--line-strong);
+    box-shadow: 4px 4px 0 var(--line);
     cursor: not-allowed;
   }
 
-  /* Quiet secondary button with the same shape. */
   .btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
     border-radius: 0.75rem;
-    border: 2px solid var(--line);
+    border: 2px solid var(--stroke);
     background: var(--surface);
     color: var(--ink);
     font-weight: 700;
     font-size: 0.875rem;
     padding: 0.45rem 0.85rem;
-    box-shadow: 0 2px 0 var(--line);
+    box-shadow: 3px 3px 0 var(--shadow);
     transition:
       transform 120ms var(--ease-out-quart),
       box-shadow 120ms var(--ease-out-quart),
-      border-color 150ms;
+      background-color 150ms;
   }
   .btn-secondary:hover {
-    border-color: var(--line-strong);
+    background: var(--raised);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--shadow);
   }
   .btn-secondary:active {
-    transform: translateY(2px);
-    box-shadow: 0 0 0 var(--line);
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--shadow);
   }
 
+  /* Outlined card with a hard offset shadow. */
   .panel {
     background: var(--surface);
-    border: 2px solid var(--line);
+    border: 2.5px solid var(--stroke);
     border-radius: 1.25rem;
+    box-shadow: 5px 5px 0 var(--shadow);
+  }
+
+  /* Small outlined chip (icons, badges, bubbles). */
+  .outlined {
+    border: 2px solid var(--stroke);
+  }
+
+  .pop-sm {
+    box-shadow: 3px 3px 0 var(--shadow);
   }
 }
 
@@ -254,6 +278,10 @@
   .btn-primary,
   .btn-secondary {
     transition: none;
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-secondary:hover {
+    transform: none;
   }
 }
 

@@ -39,12 +39,11 @@ export default function FindingsReport({ report, kind, children }) {
       <section className="panel p-5 sm:p-7">
         <div className="flex gap-5 sm:gap-7 items-center">
           <div
-            className="grid place-items-center shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-3xl border-2"
+            className="grid place-items-center shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-3xl border-[2.5px] border-stroke"
             style={{
               color: grade.color,
-              borderColor: grade.color,
-              background: tint(grade.color, 14),
-              boxShadow: `0 5px 0 ${tint(grade.color, 55)}`
+              background: tint(grade.color, 16),
+              boxShadow: "4px 4px 0 var(--shadow)"
             }}
           >
             <div className="text-center leading-none">
@@ -89,8 +88,8 @@ export default function FindingsReport({ report, kind, children }) {
       {/* NOTHING TO FIX */}
       {issues.length === 0 && (
         <div
-          className="flex gap-3 items-center rounded-2xl border-2 px-5 py-4 font-bold"
-          style={{ borderColor: tint("var(--pass)", 50), background: tint("var(--pass)", 12) }}
+          className="flex gap-3 items-center rounded-2xl outlined pop-sm px-5 py-4 font-bold"
+          style={{ background: tint("var(--pass)", 14) }}
         >
           <Icon name="checkCircle" className="w-6 h-6 shrink-0 text-pass" />
           No issues found. Your kiwi is proud of you.
@@ -237,7 +236,7 @@ function FindingRow({ finding: f, url, defaultOpen }) {
       <details className="group" open={defaultOpen}>
         <summary className="flex items-center gap-3 sm:gap-4 cursor-pointer list-none px-4 sm:px-5 py-4 hover:bg-raised transition-colors [&::-webkit-details-marker]:hidden">
           <span
-            className="grid place-items-center w-9 h-9 rounded-xl shrink-0"
+            className="grid place-items-center w-9 h-9 rounded-xl shrink-0 outlined"
             style={{ color: sev.color, background: tint(sev.color, 16) }}
           >
             <Icon name={sev.icon} className="w-5 h-5" />

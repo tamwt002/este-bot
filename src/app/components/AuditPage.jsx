@@ -81,7 +81,7 @@ export default function AuditPage({
       <section className="space-y-6">
         <div className="flex items-end gap-3">
           <Image src={logo} alt="" unoptimized width={96} height={96} priority className="w-16 h-16 sm:w-20 sm:h-20 shrink-0" />
-          <p className="relative mb-6 sm:mb-8 rounded-2xl rounded-bl-sm bg-raised border-2 border-line px-4 py-2.5 text-sm sm:text-base font-bold text-ink max-w-md">
+          <p className="relative mb-6 sm:mb-8 rounded-2xl rounded-bl-sm bg-surface outlined pop-sm px-4 py-2.5 text-sm sm:text-base font-bold text-ink max-w-md">
             {greeting}
           </p>
         </div>
@@ -98,9 +98,8 @@ export default function AuditPage({
       {error && (
         <div
           role="alert"
-          className="flex gap-3 items-start rounded-2xl border-2 px-4 py-3.5 font-semibold animate-rise"
+          className="flex gap-3 items-start rounded-2xl outlined pop-sm px-4 py-3.5 font-semibold animate-rise"
           style={{
-            borderColor: "color-mix(in oklch, var(--critical) 55%, transparent)",
             background: "color-mix(in oklch, var(--critical) 12%, transparent)"
           }}
         >
@@ -130,7 +129,7 @@ export default function AuditPage({
             {checks.map(group => (
               <div key={group.title}>
                 <h3 className="flex items-center gap-2 font-extrabold mb-2.5">
-                  <span className="grid place-items-center w-8 h-8 rounded-lg bg-raised text-accent-text">
+                  <span className="grid place-items-center w-8 h-8 rounded-lg bg-raised outlined text-accent-text">
                     <Icon name={group.icon} className="w-4.5 h-4.5" />
                   </span>
                   {group.title}

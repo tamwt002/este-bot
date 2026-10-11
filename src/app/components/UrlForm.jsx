@@ -26,7 +26,7 @@ export default function UrlForm({ onSubmit, loading, requireConsent = false, but
             className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-subtle pointer-events-none"
           />
           <input
-            className="w-full h-14 pl-12 pr-4 rounded-2xl bg-surface border-2 border-line text-ink text-lg font-semibold placeholder:text-subtle placeholder:font-medium focus:outline-none focus:border-accent transition-colors"
+            className="w-full h-14 pl-12 pr-4 rounded-2xl bg-surface outlined border-[2.5px] text-ink text-lg font-semibold placeholder:text-subtle placeholder:font-medium shadow-[4px_4px_0_var(--shadow)] focus:outline-none focus:shadow-[4px_4px_0_var(--accent)] transition-shadow"
             placeholder="your-app.lovable.app"
             value={url}
             onChange={(e) => setUrl(e.target.value)}

@@ -4,7 +4,7 @@ export function DataList({ title, children }) {
   return (
     <div>
       <h4 className="text-sm font-black mb-2">{title}</h4>
-      <dl className="rounded-xl border-2 border-line divide-y-2 divide-line text-sm overflow-hidden">
+      <dl className="rounded-xl outlined divide-y-2 divide-line text-sm overflow-hidden">
         {children}
       </dl>
     </div>
