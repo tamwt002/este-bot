@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-20 border-b-[2.5px] border-stroke bg-bg">
-      <div className="page-container h-16 flex items-center justify-between gap-3">
+      <div className="page-container h-[4.5rem] flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 shrink-0 rounded-lg">
           <Image src={logo} alt="" unoptimized width={40} height={40} priority className="w-9 h-9" />
           <span className="text-xl font-black tracking-tight">EsteBot</span>
@@ -33,7 +33,7 @@ export default function Navbar() {
                   key={tab.href}
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
-                  className={`px-3 sm:px-4 py-1 rounded-lg border-2 text-sm font-extrabold whitespace-nowrap transition-colors ${
+                  className={`px-3 sm:px-4 py-1.5 rounded-lg border-2 text-sm font-extrabold whitespace-nowrap transition-colors ${
                     active
                       ? "bg-accent text-on-accent border-stroke"
                       : "border-transparent text-muted hover:text-ink"

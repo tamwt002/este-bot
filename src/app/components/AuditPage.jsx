@@ -76,22 +76,24 @@ export default function AuditPage({
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12 sm:space-y-16">
       {/* HERO */}
-      <section className="space-y-6">
-        <div className="flex items-end gap-3">
+      <section>
+        <div className="flex items-center gap-3 sm:gap-4">
           <Image src={logo} alt="" unoptimized width={96} height={96} priority className="w-16 h-16 sm:w-20 sm:h-20 shrink-0" />
-          <p className="relative mb-6 sm:mb-8 rounded-2xl rounded-bl-sm bg-surface outlined pop-sm px-4 py-2.5 text-sm sm:text-base font-bold text-ink max-w-md">
+          <p className="rounded-2xl rounded-bl-sm bg-surface outlined pop-sm px-4 py-3 text-sm sm:text-base font-bold text-ink max-w-md">
             {greeting}
           </p>
         </div>
 
-        <div className="space-y-3">
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.05]">{title}</h1>
-          <p className="text-muted text-base sm:text-lg max-w-[62ch]">{intro}</p>
+        <div className="mt-6 sm:mt-8 space-y-4">
+          <h1 className="text-[2rem] sm:text-5xl font-black tracking-tight leading-[1.05]">{title}</h1>
+          <p className="text-muted text-base sm:text-lg leading-relaxed max-w-[60ch]">{intro}</p>
         </div>
 
-        <UrlForm onSubmit={runAudit} loading={loading} requireConsent={requireConsent} />
+        <div className="mt-8 sm:mt-10">
+          <UrlForm onSubmit={runAudit} loading={loading} requireConsent={requireConsent} />
+        </div>
       </section>
 
       {/* STATUS */}
@@ -121,20 +123,20 @@ export default function AuditPage({
 
       {/* EMPTY STATE: what gets checked */}
       {!report && !loading && (
-        <section aria-labelledby="checks-heading" className="pt-2">
-          <h2 id="checks-heading" className="text-xl font-black mb-5">
+        <section aria-labelledby="checks-heading" className="pt-10 sm:pt-12 border-t-2 border-dashed border-line">
+          <h2 id="checks-heading" className="text-2xl font-black mb-7">
             What I sniff for
           </h2>
-          <div className="grid gap-x-8 gap-y-7 sm:grid-cols-3">
+          <div className="grid gap-x-10 gap-y-9 sm:grid-cols-3">
             {checks.map(group => (
               <div key={group.title}>
-                <h3 className="flex items-center gap-2 font-extrabold mb-2.5">
-                  <span className="grid place-items-center w-8 h-8 rounded-lg bg-raised outlined text-accent-text">
-                    <Icon name={group.icon} className="w-4.5 h-4.5" />
+                <h3 className="flex items-center gap-2.5 text-lg font-extrabold mb-4">
+                  <span className="grid place-items-center w-9 h-9 rounded-xl bg-raised outlined text-accent-text">
+                    <Icon name={group.icon} className="w-5 h-5" />
                   </span>
                   {group.title}
                 </h3>
-                <ul className="space-y-1.5 text-sm text-muted">
+                <ul className="space-y-2.5 text-[0.9375rem] leading-snug text-muted">
                   {group.items.map(item => (
                     <li key={item} className="flex gap-2">
                       <Icon name="check" className="w-4 h-4 mt-0.5 shrink-0 text-pass" strokeWidth={3} />
@@ -147,7 +149,7 @@ export default function AuditPage({
           </div>
 
           {note && (
-            <p className="mt-8 flex gap-2.5 items-start text-sm text-muted max-w-[70ch]">
+            <p className="mt-10 flex gap-2.5 items-start text-[0.9375rem] text-muted max-w-[70ch]">
               <Icon name="lock" className="w-4 h-4 mt-0.5 shrink-0 text-accent-text" />
               <span>{note}</span>
             </p>

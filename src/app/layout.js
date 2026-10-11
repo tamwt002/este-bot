@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-bg text-ink font-sans min-h-screen flex flex-col">
         <Navbar />
-        <main className="page-container py-8 sm:py-14 flex-1">{children}</main>
+        <main className="page-container pt-10 pb-16 sm:pt-14 sm:pb-24 flex-1">{children}</main>
         <Footer />
         <Analytics />
       </body>

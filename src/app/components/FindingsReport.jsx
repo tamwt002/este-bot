@@ -34,7 +34,7 @@ export default function FindingsReport({ report, kind, children }) {
   const urgent = summary.counts.critical + summary.counts.high
 
   return (
-    <div className="space-y-8 animate-rise">
+    <div className="space-y-10 sm:space-y-12 animate-rise">
       {/* SUMMARY */}
       <section className="panel p-5 sm:p-7">
         <div className="flex gap-5 sm:gap-7 items-center">
@@ -108,7 +108,7 @@ export default function FindingsReport({ report, kind, children }) {
         const title = index === 0 && group.title === "Then these" ? "Start here" : group.title
         return (
           <section key={group.title} aria-label={title}>
-            <div className="flex items-baseline justify-between gap-3 mb-3">
+            <div className="flex items-baseline justify-between gap-3 mb-4">
               <h3 className="text-lg font-black">
                 {title} <span className="text-subtle font-extrabold">({items.length})</span>
               </h3>
