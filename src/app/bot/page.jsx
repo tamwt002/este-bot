@@ -10,8 +10,8 @@ export default function BotPage() {
 
       <p>
         If you found <code className="bg-raised px-1 rounded">EsteBot/1.0</code> in
-        your server logs, a user of this site ran an on-demand SEO or security
-        audit against one of your pages.
+        your server logs, a user of this site ran an on-demand
+        SEO, security or accessibility audit against one of your pages.
       </p>
 
       <div className="panel p-6 space-y-3">

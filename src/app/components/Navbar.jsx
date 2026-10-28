@@ -7,7 +7,8 @@ import ThemeToggle from "./ThemeToggle"
 
 const TABS = [
   { href: "/", label: "SEO", long: "SEO check" },
-  { href: "/security", label: "Security", long: "Security check" }
+  { href: "/security", label: "Security", long: "Security check" },
+  { href: "/accessibility", label: "A11y", long: "Accessibility check", title: "Accessibility" }
 ]
 
 export default function Navbar() {
@@ -16,9 +17,9 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-20 border-b-[2.5px] border-stroke bg-bg">
       <div className="page-container h-[4.5rem] flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-2 shrink-0 rounded-lg">
+        <Link href="/" aria-label="EsteBot home" className="flex items-center gap-2 shrink-0 rounded-lg">
           <Image src={logo} alt="" unoptimized width={40} height={40} priority className="w-9 h-9" />
-          <span className="text-xl font-black tracking-tight">EsteBot</span>
+          <span className="hidden sm:inline text-xl font-black tracking-tight">EsteBot</span>
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">
@@ -33,14 +34,15 @@ export default function Navbar() {
                   key={tab.href}
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
-                  className={`px-3 sm:px-4 py-1.5 rounded-lg border-2 text-sm font-extrabold whitespace-nowrap transition-colors ${
+                  title={tab.title}
+                  className={`px-2.5 sm:px-3 lg:px-4 py-1.5 rounded-lg border-2 text-sm font-extrabold whitespace-nowrap transition-colors ${
                     active
                       ? "bg-accent text-on-accent border-stroke"
                       : "border-transparent text-muted hover:text-ink"
                   }`}
                 >
-                  <span className="sm:hidden">{tab.label}</span>
-                  <span className="hidden sm:inline">{tab.long}</span>
+                  <span className="lg:hidden">{tab.label}</span>
+                  <span className="hidden lg:inline">{tab.long}</span>
                 </Link>
               )
             })}

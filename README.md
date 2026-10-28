@@ -1,6 +1,6 @@
 # EsteBot
 
-**EsteBot is a pre-launch checker for vibe-coded websites.** If you built your app with Lovable, Bolt, v0, Cursor, Replit or any other AI tool, paste in the URL and EsteBot checks for the SEO and security mistakes AI-built sites make most: API keys shipped in frontend JavaScript, downloadable `.env` files, blank pages that Google can't read, template titles, leftover `noindex` tags, and more.
+**EsteBot is a pre-launch checker for vibe-coded websites.** If you built your app with Lovable, Bolt, v0, Cursor, Replit or any other AI tool, paste in the URL and EsteBot checks for the SEO, security and accessibility mistakes AI-built sites make most: API keys shipped in frontend JavaScript, downloadable `.env` files, blank pages that Google can't read, template titles, leftover `noindex` tags, icon buttons with no label, zoom switched off, and more.
 
 Every issue comes with a plain-English explanation, a severity, an A–F grade, and a **"Copy fix prompt"** button that produces a ready-to-paste instruction for your AI coding tool.
 
@@ -49,6 +49,15 @@ Requires the user to confirm they own the site or have permission to test it.
 - **Cookies**: missing `Secure`, `HttpOnly` (session cookies) and `SameSite`.
 - **Supabase / Firebase detected**: reminders to check RLS and Security Rules. EsteBot never queries the database itself.
 
+### Accessibility Audit (`/accessibility`)
+Static checks on the HTML the site sends, aimed at common AI-builder mistakes (WCAG 2.x):
+- **Zoom disabled** (`user-scalable=no` / `maximum-scale`), missing `<html lang>`, missing `<title>`
+- **Names**: form fields without labels (placeholder-only fields called out), icon buttons and icon links with no accessible name, images without alt (`alt=""` treated as decorative)
+- **Keyboard & structure**: clickable `div`/`span`s, focus outlines removed (CSS or Tailwind `outline-none` without a focus style), positive `tabindex`, `aria-hidden` containing focusable controls, missing H1, skipped heading levels, no `<main>`
+- **Other**: iframes without titles, autoplaying sound, vague "click here" links, duplicate IDs
+- **Manual reminders**: colour contrast and keyboard testing, which need a rendered page
+- Pages drawn entirely by JavaScript (empty `#root`) are shown as a **partial check** with no letter grade, rather than a misleading A
+
 ### Report
 - A–F grade and 0–100 score, issue counts by severity
 - Each finding has a plain-English explanation, evidence and a "How to fix" note, plus a **Copy fix prompt** button
@@ -88,6 +97,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - `/` – SEO Audit
 - `/security` – Security Audit
+- `/accessibility` – Accessibility Audit
 - `/bot` – info page for site owners about the EsteBot crawler
 - `/privacy`, `/disclaimer` – legal pages
 
@@ -117,15 +127,18 @@ src/app/
 ├── twitter-image.js              # Same image for Twitter/X cards
 ├── globals.css                   # Tailwind entry
 ├── security/page.jsx             # Security Audit page (with permission checkbox)
+├── accessibility/page.jsx        # Accessibility Audit page
 ├── privacy/page.jsx              # Privacy Policy
 ├── disclaimer/page.jsx           # Disclaimer & Acceptable Use
 ├── bot/page.jsx                  # Info page for site owners about the EsteBot crawler
 ├── api/
 │   ├── audit/route.js            # POST /api/audit – SEO audit (+ robots.txt, sitemap)
-│   └── security-audit/route.js   # POST /api/security-audit – security audit (consent required)
+│   ├── security-audit/route.js   # POST /api/security-audit – security audit (consent required)
+│   └── a11y-audit/route.js       # POST /api/a11y-audit – accessibility audit
 ├── lib/
 │   ├── seoChecks.js              # SEO checks → findings
 │   ├── securityChecks.js         # Headers, bundles, exposed files, CORS, cookies → findings
+│   ├── a11yChecks.js             # Static accessibility checks → findings
 │   ├── secretPatterns.js         # Secret-key regexes, Supabase JWT role detection, redaction
 │   ├── findings.js               # Finding shape, scoring/grade, stack detection
 │   ├── safeFetch.js              # SSRF-safe HTTP client, bot-challenge detection, User-Agent
@@ -136,6 +149,7 @@ src/app/
     ├── FindingsReport.jsx        # Grade, findings, copy-prompt buttons, passed checks
     ├── AuditSection.jsx          # Raw SEO details
     ├── SecurityAuditSection.jsx  # Raw security details
+    ├── A11yAuditSection.jsx      # Raw accessibility details
     ├── ScoreCard.jsx
     └── LegalSection.jsx          # Shared layout for legal pages
 ```
@@ -170,6 +184,14 @@ Request:
 ```json
 { "url": "https://example.com" }
 ```
+
+### `POST /api/a11y-audit`
+
+Request:
+```json
+{ "url": "https://example.com" }
+```
+Same response shape as below; `summary.limited` is `true` when the page is an empty JavaScript shell.
 
 ### `POST /api/security-audit`
 

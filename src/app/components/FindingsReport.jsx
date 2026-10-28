@@ -29,7 +29,10 @@ const tint = (color, pct) => `color-mix(in oklch, ${color} ${pct}%, transparent)
 
 export default function FindingsReport({ report, kind, children }) {
   const { summary, findings, passed, stack, url } = report
-  const grade = GRADES[summary.grade]
+  // Partial checks (e.g. a page drawn entirely by JavaScript) get no letter grade.
+  const grade = summary.limited
+    ? { color: "var(--info)", line: "I could only check the basics on this one." }
+    : GRADES[summary.grade]
   const issues = findings.filter(f => f.severity !== "info")
   const urgent = summary.counts.critical + summary.counts.high
 
@@ -47,9 +50,9 @@ export default function FindingsReport({ report, kind, children }) {
             }}
           >
             <div className="text-center leading-none">
-              <span className="block text-5xl sm:text-7xl font-black">{summary.grade}</span>
+              <span className="block text-5xl sm:text-7xl font-black">{summary.limited ? "?" : summary.grade}</span>
               <span className="block mt-1 text-xs sm:text-sm font-extrabold opacity-90">
-                {summary.score}/100
+                {summary.limited ? "Partial" : `${summary.score}/100`}
               </span>
             </div>
           </div>
