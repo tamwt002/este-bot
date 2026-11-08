@@ -121,7 +121,7 @@ export function runSeoChecks(html, url, status, extra = {}) {
   // IMAGES
   // -----------------------------
   const images = $("img")
-  const imagesMissingAlt = images.filter((i, el) => !$(el).attr("alt")).length
+  const imagesMissingAlt = images.filter((i, el) => $(el).attr("alt") === undefined).length
 
   const mixedContent = images
     .map((i, el) => $(el).attr("src"))

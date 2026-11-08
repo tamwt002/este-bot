@@ -2,7 +2,8 @@ import Link from "next/link"
 import LegalSection from "../components/LegalSection"
 
 export const metadata = {
-  title: "Privacy Policy | EsteBot",
+  title: "Privacy Policy",
+  alternates: { canonical: "/privacy" },
   description: "What EsteBot collects (very little), how it's used, and what is never stored."
 }
 

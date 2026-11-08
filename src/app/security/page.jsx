@@ -1,63 +1,48 @@
-"use client"
-import AuditPage from "../components/AuditPage"
-import SecurityAuditSection from "../components/SecurityAuditSection"
+import SecurityAudit from "../components/audits/SecurityAudit"
+import Faq from "../components/Faq"
+import JsonLd from "../components/JsonLd"
+import { PAGES, auditPageJsonLd } from "../lib/site"
 
-const STEPS = [
-  "Connecting to your site",
-  "Checking HTTPS and security headers",
-  "Sniffing your JavaScript for leaked keys",
-  "Checking for exposed .env and .git files",
-  "Checking cookies and CORS",
-  "Working out your score"
-]
+const page = PAGES.security
 
-const CHECKS = [
+export const metadata = {
+  title: page.title,
+  description: page.description,
+  alternates: { canonical: page.path },
+  // Page-level openGraph replaces the root one, so the shared image is set again here.
+  openGraph: { title: `${page.title} | EsteBot`, description: page.description, url: page.path, images: "/opengraph-image" },
+  twitter: { title: `${page.title} | EsteBot`, description: page.description, images: "/twitter-image" }
+}
+
+const FAQS = [
   {
-    title: "Leaked secrets",
-    icon: "key",
-    items: [
-      "OpenAI, Anthropic, Stripe keys in your JS",
-      "Supabase service_role and AWS keys",
-      "Database URLs with passwords",
-      "Downloadable .env and .git files"
-    ]
+    q: "Is it safe to have my Supabase anon key in my frontend?",
+    a: "Yes, the anon (publishable) key is designed to be public, but only if Row Level Security is switched on for every table with policies that limit what each user can read and write. Without RLS, anyone with that key can read or change your whole database. Your service_role or secret key must never be in frontend code."
   },
   {
-    title: "Vibe-code slip-ups",
-    icon: "file",
-    items: [
-      "Dev server running in production",
-      "Public source maps",
-      "Supabase RLS and Firebase rules reminders",
-      "Version-leaking headers"
-    ]
+    q: "What should I do if my API key is exposed?",
+    a: "Revoke or rotate the key straight away in the provider's dashboard, then move any code that uses it into a server-side route or function that reads it from a private environment variable. Check the provider's usage and billing for anything unexpected. Just deleting the key from your code isn't enough, because old versions can still be cached or sitting in your git history."
   },
   {
-    title: "Locks on the doors",
-    icon: "shield",
-    items: [
-      "HTTPS and HTTP→HTTPS redirect",
-      "HSTS, CSP and clickjacking protection",
-      "Cookie flags",
-      "Risky CORS settings"
-    ]
+    q: "Why is a public .env file so dangerous?",
+    a: "A .env file usually holds every password, API key and database URL your app uses. If it can be downloaded from your site, anyone can take them all at once. Block access to it on your host, remove it from your deployed files and rotate every secret it contained."
+  },
+  {
+    q: "Will scanning my site show my secrets to anyone?",
+    a: "No. Any key EsteBot finds is redacted on the server, so only a few characters are ever shown. It checks whether sensitive files are reachable but never displays their contents, and nothing is stored. Only scan sites you own or have permission to test."
+  },
+  {
+    q: "Is this a full security audit or penetration test?",
+    a: "No. EsteBot checks the public parts of your site for the most common mistakes in AI-built apps. A good result doesn't guarantee your site is secure, so for anything handling payments or sensitive data, consider a professional review."
   }
 ]
 
-export default function SecurityAuditPage() {
+export default function SecurityPage() {
   return (
-    <AuditPage
-      kind="Security"
-      endpoint="/api/security-audit"
-      title="Is your site leaking secrets?"
-      intro="AI tools ship fast, and sometimes they ship your API keys too. EsteBot checks your live site for the security mistakes vibe-coded apps make most."
-      greeting="Only point me at sites you own, eh? I'll keep anything I find to myself."
-      steps={STEPS}
-      checks={CHECKS}
-      note="Any keys I find are redacted, so you'll only see a few characters. I never show what's inside exposed files, never log in, and never try anything sneaky."
-      requireConsent
-      timeoutMs={60000}
-      Details={SecurityAuditSection}
-    />
+    <>
+      <JsonLd data={auditPageJsonLd({ name: "EsteBot Security Checker", path: page.path, description: page.description, faqs: FAQS })} />
+      <SecurityAudit />
+      <Faq faqs={FAQS} />
+    </>
   )
 }

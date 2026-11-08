@@ -2,7 +2,8 @@ import Link from "next/link"
 import LegalSection from "../components/LegalSection"
 
 export const metadata = {
-  title: "Disclaimer & Acceptable Use | EsteBot",
+  title: "Disclaimer & Acceptable Use",
+  alternates: { canonical: "/disclaimer" },
   description: "Rules for using EsteBot: only scan websites you own or are authorised to test."
 }
 

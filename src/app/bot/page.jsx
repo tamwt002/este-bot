@@ -1,5 +1,6 @@
 export const metadata = {
-  title: "EsteBot Crawler | EsteBot",
+  title: "About the EsteBot Crawler",
+  alternates: { canonical: "/bot" },
   description: "Information about the EsteBot user agent for site owners."
 }
 

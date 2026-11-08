@@ -122,7 +122,8 @@ None required. The app has no database, API keys, or external services — it on
 ```
 src/app/
 ├── layout.js                     # Root layout, Navbar, Footer, global metadata
-├── page.js                       # SEO Audit page
+├── page.js                       # SEO Audit page (server: metadata, FAQ, JSON-LD)
+├── robots.js / sitemap.js        # robots.txt (blocks /api/) and sitemap.xml (public pages only)
 ├── opengraph-image.js            # Generated 1200×630 social preview image
 ├── twitter-image.js              # Same image for Twitter/X cards
 ├── globals.css                   # Tailwind entry
@@ -141,10 +142,13 @@ src/app/
 │   ├── a11yChecks.js             # Static accessibility checks → findings
 │   ├── secretPatterns.js         # Secret-key regexes, Supabase JWT role detection, redaction
 │   ├── findings.js               # Finding shape, scoring/grade, stack detection
+│   ├── site.js                   # Public SEO facts: page titles/descriptions, JSON-LD builders
 │   ├── safeFetch.js              # SSRF-safe HTTP client, bot-challenge detection, User-Agent
 │   └── rateLimit.js              # Per-IP rate limiter for API routes
 └── components/
     ├── Navbar.jsx / Footer.jsx
+    ├── audits/                   # Interactive (client) parts of each audit page
+    ├── Faq.jsx / JsonLd.jsx      # Server-rendered FAQ + structured data
     ├── UrlForm.jsx               # URL input, optional permission checkbox
     ├── FindingsReport.jsx        # Grade, findings, copy-prompt buttons, passed checks
     ├── AuditSection.jsx          # Raw SEO details

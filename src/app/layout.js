@@ -3,6 +3,8 @@ import Footer from "./components/Footer";
 import "./globals.css";
 import { Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next"
+import JsonLd from "./components/JsonLd";
+import { PAGES, SITE_URL, siteJsonLd } from "./lib/site";
 
 // Rounded, friendly sans used for everything (self-hosted by next/font)
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
@@ -13,23 +15,26 @@ const themeScript = `try{if(localStorage.getItem("theme")==="light")document.doc
 // SEO metadata (Top-level export)
 // Social preview images come from opengraph-image.js / twitter-image.js
 export const metadata = {
-  metadataBase: new URL("https://estebot.woztech.world"),
-  title: "EsteBot | In Depth Auditors",
-  description: "Check your vibe-coded site before launch: SEO and security audits for apps built with Lovable, Bolt, v0, Cursor and Replit.",
-  keywords: ["Cyber Security", "SEO", "Insights"],
+  metadataBase: new URL(SITE_URL),
+  title: { default: PAGES.seo.title, template: "%s | EsteBot" },
+  description: PAGES.seo.description,
+  applicationName: "EsteBot",
+  keywords: [
+    "vibe coding", "Lovable SEO", "SEO checker", "website security scanner",
+    "exposed API key checker", "accessibility checker", "Bolt", "v0", "Cursor", "Replit"
+  ],
   authors: [{ name: "Tinotenda Tamangani", url: "https://wallace.woztech.world" }],
   openGraph: {
-    title: "EsteBot | In Depth Auditors",
-    description: "Check your vibe-coded site before launch: SEO and security audits for apps built with Lovable, Bolt, v0, Cursor and Replit.",
-    url: "/",
+    title: PAGES.seo.title,
+    description: PAGES.seo.description,
     siteName: "EsteBot",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "EsteBot | In Depth Auditors",
-    description: "Check your vibe-coded site before launch: SEO and security audits for apps built with Lovable, Bolt, v0, Cursor and Replit.",
+    title: PAGES.seo.title,
+    description: PAGES.seo.description,
   },
 };
 
@@ -44,6 +49,7 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="bg-bg text-ink font-sans min-h-screen flex flex-col">
+        <JsonLd data={siteJsonLd} />
         <Navbar />
         <main className="page-container pt-10 pb-16 sm:pt-14 sm:pb-24 flex-1">{children}</main>
         <Footer />

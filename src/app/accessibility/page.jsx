@@ -1,60 +1,48 @@
-"use client"
-import AuditPage from "../components/AuditPage"
-import A11yAuditSection from "../components/A11yAuditSection"
+import AccessibilityAudit from "../components/audits/AccessibilityAudit"
+import Faq from "../components/Faq"
+import JsonLd from "../components/JsonLd"
+import { PAGES, auditPageJsonLd } from "../lib/site"
 
-const STEPS = [
-  "Fetching your page",
-  "Checking language, title and zoom",
-  "Checking labels on buttons, links and forms",
-  "Checking images, headings and landmarks",
-  "Working out your score"
-]
+const page = PAGES.accessibility
 
-const CHECKS = [
+export const metadata = {
+  title: page.title,
+  description: page.description,
+  alternates: { canonical: page.path },
+  // Page-level openGraph replaces the root one, so the shared image is set again here.
+  openGraph: { title: `${page.title} | EsteBot`, description: page.description, url: page.path, images: "/opengraph-image" },
+  twitter: { title: `${page.title} | EsteBot`, description: page.description, images: "/twitter-image" }
+}
+
+const FAQS = [
   {
-    title: "Can everyone use it?",
-    icon: "eye",
-    items: [
-      "Pinch-to-zoom switched off",
-      "Missing page language",
-      "Images without alt text",
-      "Sound that autoplays"
-    ]
+    q: "Why does accessibility matter for my site?",
+    a: "The World Health Organization estimates around 1 in 6 people live with a significant disability. If your site doesn't work with screen readers, keyboards or zoom, you're shutting those people out. Many countries also have laws that can apply to websites, and accessible sites tend to be easier for everyone to use."
   },
   {
-    title: "Screen reader slip-ups",
-    icon: "info",
-    items: [
-      "Icon buttons with no name",
-      "Icon links with no name",
-      "Form fields with only a placeholder",
-      "Embeds without a title"
-    ]
+    q: "What accessibility mistakes do AI-built sites make most?",
+    a: "Icon-only buttons and links with no label, form fields that only use placeholder text, zoom switched off in the viewport tag, images without alt text, clickable divs instead of real buttons, and focus outlines removed so keyboard users can't see where they are."
   },
   {
-    title: "Keyboard and structure",
-    icon: "search",
-    items: [
-      "Clickable divs that aren't buttons",
-      "Focus outlines removed",
-      "Skipped heading levels",
-      "Missing <main>, odd tab order"
-    ]
+    q: "Can EsteBot check colour contrast?",
+    a: "Not yet. Contrast depends on how the page is rendered, so EsteBot reminds you to check it yourself. Chrome DevTools shows the contrast ratio when you inspect text: body text needs at least 4.5:1 and large text 3:1."
+  },
+  {
+    q: "Does passing this check mean my site is WCAG compliant?",
+    a: "No. Automated checks only catch some accessibility problems. Use EsteBot to fix the common ones quickly, then test with a keyboard and a screen reader, and use a tool like Lighthouse or axe for a deeper look."
+  },
+  {
+    q: "My site was marked as a partial check. Why?",
+    a: "Your page is built almost entirely by JavaScript, so the HTML EsteBot receives is nearly empty and most checks can't run. Run Lighthouse's accessibility audit in Chrome DevTools on your live pages to check what's inside your app."
   }
 ]
 
-export default function AccessibilityAuditPage() {
+export default function AccessibilityPage() {
   return (
-    <AuditPage
-      kind="Accessibility"
-      endpoint="/api/a11y-audit"
-      title="Can everyone use your site?"
-      intro="AI tools love icon-only buttons, placeholder-only forms and turning off zoom. EsteBot checks your live site for the accessibility mistakes vibe-coded apps make most, so people using screen readers, keyboards or zoom aren't locked out."
-      greeting="I'm a kiwi, I can't fly. Let's make sure nobody gets stuck on your site either."
-      steps={STEPS}
-      checks={CHECKS}
-      note="I check the HTML your site sends. Colour contrast and keyboard use need a real browser, so I'll tell you how to check those yourself."
-      Details={A11yAuditSection}
-    />
+    <>
+      <JsonLd data={auditPageJsonLd({ name: "EsteBot Accessibility Checker", path: page.path, description: page.description, faqs: FAQS })} />
+      <AccessibilityAudit />
+      <Faq faqs={FAQS} />
+    </>
   )
 }
